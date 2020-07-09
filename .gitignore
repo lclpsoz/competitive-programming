@@ -1,7 +1,10 @@
 *
-!Makefile*
+
 !*.*
 !*/
+
+!Makefile*
+
 *.in*
 *.out*
 *.txt
@@ -9,6 +12,9 @@
 
 *.*~*
 *.*#*
+*.*swp*
+*.*"*
+
 
 *.jar
 *.class

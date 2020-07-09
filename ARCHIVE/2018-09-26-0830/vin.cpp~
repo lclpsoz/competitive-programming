@@ -1,0 +1,30 @@
+#include<bits/stdc++.h>
+int main(){
+  int b,n,d,c,v,cp=0;
+  scanf("%d%d",&b,&n);
+  int r[b];
+  while(b!=0 || n!=0){
+    for(int i=0; i<b; i++){
+      scanf("%d",&r[i]);
+    }
+    for(int i=0; i<n; i++){
+      scanf("%d%d%d",&d,&c,&v);
+      r[d-1]-=v;
+      r[c-1]+=v;
+    }
+    for(int i=0; i<b; i++){
+      if(r[i]>=0){
+	cp++;
+      }
+    }
+    if(cp==b){
+      printf("%c\n",'S');
+    }else{
+      printf("%c\n",'N');
+    }
+    cp=0;
+    scanf("%d%d",&b,&n);
+
+  }
+  return 0;
+} 

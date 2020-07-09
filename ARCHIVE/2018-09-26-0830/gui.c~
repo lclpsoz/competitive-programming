@@ -1,0 +1,66 @@
+#include "stdio.h"
+#include "stdlib.h"
+#include "string.h"
+
+typedef struct reg{
+  int num1;
+  char nome;
+}aluno;
+
+// Rearranja v[0..n-1] em ordem crescente
+// supondo que os elementos do vetor 
+// pertencem ao universo 0..R-1.
+
+void 
+countingsort (aluno **v, int n, int R) 
+{
+  aluno *f[R+1];
+  for (int r = 0; r <= R; ++r) {
+    f[r] = (aluno*) malloc (sizeof (aluno));
+    f[r]->num1 = 0;
+    f[r]->nome = '\0';
+  }
+  for (int i = 0; i < n; ++i) {
+    f[v[i]->num1]->num1++;
+    f[v[i]->num1]->nome = v[i]->nome;
+    printf("f[%d]: %d\n", v[i]->num1, f[v[i]->num1]->num1);
+  } 
+  int i = 0;
+  for (int r = 0; r <= R; ++r)        // 6
+    for (int k = 1; k <= f[r]->num1; ++k) {  // 7
+      v[i]->num1 = r;
+      v[i++]->nome = f[r]->nome;
+      printf("v[%d]: %d %c r: %d\n", i-1, v[i-1]->num1, v[i-1]->nome, r);
+      //v[i]->nome = v[]->nome;
+    }
+  for (int i = 0; i <= R; i++)
+    free (f[i]);
+  for(int i = 0; i < n; i++)
+    printf("%d %c\n", v[i]->num1, v[i]->nome);
+}
+
+int main () {
+	
+  aluno *escola[5];
+  int dig = 5;
+  char let = 'a';
+	
+  for (int i = 0; i < 5; i++) {
+    aluno *aux = malloc (sizeof (aluno));
+    aux->num1 = dig;
+    dig--;
+    aux->nome = let;
+    let += 1;
+    escola[i] = aux; 
+  }
+	
+  escola[1]->num1 = 5;
+  escola[1]->nome = 'a';
+	
+  countingsort(escola, 5, 5);
+  for (int i = 0; i < 5; i++)
+    printf("%03d %c\n", escola[i]->num1, escola[i]->nome);
+  putchar('\n');
+	
+  return 0;
+}

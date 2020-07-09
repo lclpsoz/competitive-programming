@@ -1,0 +1,13 @@
+def crivo(n):
+    inteiros = [i for i in range(2, n)]
+    i = 0
+    while i != len(inteiros)-1:
+        for k in inteiros:
+            if k != inteiros[i] and k%inteiros[i] == 0:
+                inteiros.remove(k)
+        i += 1
+    return inteiros
+
+
+
+print (crivo(100))

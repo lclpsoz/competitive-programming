@@ -1,0 +1,11 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+const int N = 1e7, D = 30;
+
+char trie_arr[N][D];
+map<char, int> trie_map[N];
+
+int main () {
+  
+}

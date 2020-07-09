@@ -1,0 +1,55 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+////////////// Prewritten code follows. Look down for solution. ////////////////
+#define x first
+#define y second
+#define len(x) ((int)(x).size())
+using pii = pair<int, int>;
+using ll = long long;
+using llu = long long unsigned;
+using ld = long double;
+
+const ld EPS = 1e-9;
+int cmp(ld x, ld y = 0, ld tol = EPS) {
+  return (x <= y + tol) ? (x + tol < y) ? -1 : 0 : 1;
+}
+
+const int MOD = 1;
+int mod (ll x, ll m = MOD) {
+  return ((x%m) + m)%m;
+}
+
+////////////////////////// Solution starts below. //////////////////////////////
+
+int t;
+
+int func (int h, int m) {
+  int h2, m2;
+  scanf ("%d:%d", &h2, &m2);
+  h2 -= h;
+  m2 -= m;
+  m2 += h2*60;
+  return m2;
+}
+
+int main () {
+  scanf ("%d", &t);
+  while (t--) {
+    int n;
+    scanf ("%d", &n);
+    int acu = func (8, 0);
+    acu += func (12, 0);
+    acu += func (14, 0);
+    acu += func (18, 0);
+    if (acu >= 0)
+      printf ("+");
+    else
+      printf ("-");
+    int h = acu/60;
+    acu %= 60;
+    printf (" %d:%d\n", h, acu);
+  }
+  
+  return 0;
+}

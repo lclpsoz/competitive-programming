@@ -1,0 +1,9 @@
+from random import random
+
+n = int(random()*30)
+MAXN = int(2**64 - 1)
+
+print(n)
+
+for i in range (n):
+    print(int(random()*MAXN))

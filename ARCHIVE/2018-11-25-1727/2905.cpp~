@@ -1,0 +1,73 @@
+#include "bits/stdc++.h"
+using namespace std;
+
+////////////// Prewritten code follows. Look down for solution. ////////////////
+#define x first
+#define y second
+#define len(x) ((int)(x).size())
+using pii = pair<int, int>;
+using ll = long long;
+using llu = long long unsigned;
+using ld = long double;
+
+const ld EPS = 1e-9;
+inline int cmp(ld x, ld y = 0, ld tol = EPS) {
+  return (x <= y + tol) ? (x + tol < y) ? -1 : 0 : 1;
+}
+
+const int MOD = 1;
+inline int mod (ll x, int m = MOD) {
+  return (int)(((x%m) + m)%m);
+}
+
+////////////////////////// Solution starts below. //////////////////////////////
+
+const int N = 1e4+100;
+const ll INF = 1e13;
+
+int n;
+bool vis[N][125][6];
+ll dp[N][125][6];
+ll mat[N][4];
+
+ll func (int p, int tm, int pos) {
+  if (tm >= 120 || pos == 6) {
+    tm = 0;
+    pos = 0;
+  }
+  
+  if (p == n)
+    return 0;
+  
+  ll &r = dp[p][tm][pos];
+  if (vis[p][tm][pos])
+    return r;
+  vis[p][tm][pos] = true;
+
+  r = INF;
+  ll *now = mat[p];
+  r = min (r, func (p+1, now[0], 1) + now[1]); // Start over
+  if (pos == 1)
+    r = min (r, func (p+1, now[0] + tm, 2) + now[2]);
+
+  if (pos > 1)
+    r = min (r,  func (p+1, now[0] + tm, p+1) + now[3]);
+
+  //printf ("%d %d %d %lld\n", p, tm, pos, r);
+  return r;
+}
+
+int main () {
+  scanf ("%d", &n);
+  for (int i = 0; i < n; i++) {
+    scanf ("%d %d", &mat[i][0], &mat[i][1]);
+    mat[i][1] *= 100;
+    mat[i][2] = mat[i][1]/2;
+    mat[i][3] = mat[i][1]/4;
+  }
+
+  printf ("%.2Lf\n", (ld)func (0, 0, 0)/100.0);
+    
+  
+  return 0;
+}

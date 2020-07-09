@@ -1,0 +1,86 @@
+#include <stdio.h>
+#include <algorithm>
+using namespace std;
+
+#define x first
+#define y second
+#define len(x) ((int)(x).size())
+using pii = pair<int, int>;
+using ll = long long;
+using llu = long long unsigned;
+using ld = long double;
+
+const int N = 1010;
+
+int t;
+int mat[N][N], mat_qnt[N][N];;
+int bit1[N], bit2[N];
+int en;
+pii arr[N];
+
+void add (int *bit, int p, int v) {
+  while (p < N) {
+    bit[p] += v;
+    p += p&-p;
+  }
+}
+
+int sum (int *bit, int p) {
+  int r = 0;
+  while (p >= 1) {
+    r += bit[p];
+    p -= p&-p;
+  }
+  
+  return r;
+}
+
+void upd (int l, int r, int v) {
+  add (bit1, l, v);
+  add (bit1, r+1, -v);
+  add (bit2, l, v * (l-1));
+  add (bit2, r+1, -v * r);
+}
+
+int query (int p) {
+  return sum (bit1, p)*p - sum (bit2, p);
+}
+
+
+
+int main () {
+  int r, c;
+  scanf ("%d", &t);
+  while (t--) {
+    scanf ("%d %d", &r, &c);
+    for (int i = 1; i <= r; i++)
+      for (int j = 1; j <= c; j++) {
+	scanf ("%d", &mat[i][j]);
+	if (mat[i-1][j] == mat[i][j])
+	  mat_qnt[i][j] = mat_qnt[i-1][j]+1;
+	else
+	  mat_qnt[i][j] = 1;
+      }
+
+    ll ans = 0;
+    for (int i = 1; i <= r; i++) {
+      clean_bit();
+      for (int j = 1; j <= c; j++) {
+	if (mat[i][j] != mat[i][j-1])
+	  clean_bit ();
+	else if (mat_qnt[i][j] < mat_qnt[i][j-1])
+	  clean_bit(mat_qnt[i][j]);
+	ans += mat_qnt[i][j];
+	ans += (sum (1) - sum (mat_qnt[i][j]+1));
+	add (1, mat_qnt[i][j]);
+	add (mat_qnt[i][j]+1, -mat_qnt[i][j]);
+	q.push ({mat_qnt[i][j], 1});
+_qnt[i][j], ans);
+      }
+    }
+    
+    printf ("%lld\n", ans);
+  }
+  
+  return 0;
+}

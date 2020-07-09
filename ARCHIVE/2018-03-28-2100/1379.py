@@ -1,0 +1,10 @@
+arr = raw_input ()
+arr = arr.split (' ')
+a = int (arr[0])
+b = int (arr[1])
+while (a > 0 or b > 0):
+    print (2*a-b)
+    arr = raw_input ()
+    arr = arr.split (' ')
+    a = int (arr[0])
+    b = int (arr[1])

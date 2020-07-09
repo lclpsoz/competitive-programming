@@ -1,0 +1,16 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+const int N = 1010;
+
+char arr[N];
+string str;
+
+int main () {
+  scanf ("%s", arr);
+  cin >> str;
+  printf ("%d %d\n",
+	  atoi (str), stoi (arr));
+  
+  return 0;
+}

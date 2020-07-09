@@ -1,0 +1,6 @@
+from math import log10
+n = int(input())
+while (n > 0):
+    x, y = map(int, input().split(' '))
+    print(int(log10 (x**y)))
+    n-=1

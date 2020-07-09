@@ -1,0 +1,7 @@
+from random import random
+
+for j in range (100000):
+    for i in range (100):
+        print(chr(ord('a') +
+                  int(random()*26)), end="")
+    print()

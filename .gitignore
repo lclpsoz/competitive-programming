@@ -1,0 +1,9 @@
+*
+!Makefile*
+!*.*
+!*/
+*.in
+*.out
+*.jar
+*.txt
+*.ipynb_checkpoints/

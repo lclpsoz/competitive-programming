@@ -1,0 +1,63 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+////////////// Prewritten code follows. Look down for solution. ////////////////
+#define x first
+#define y second
+#define pb push_back
+#define foreach(x, v) for (typeof (v).begin() x=(v).begin(); x !=(v).end(); ++x)
+#define For(i, a, b) for (int i=(a); i<(b); ++i)
+#define D(x) cerr << #x " is " << (x) << endl
+typedef pair<int, int> pii;
+typedef long long ll;
+const int INF = 1e9;
+
+const double EPS = 1e-9;
+int cmp(double x, double y = 0, double tol = EPS) {
+    return (x <= y + tol) ? (x + tol < y) ? -1 : 0 : 1;
+}
+
+////////////////////////// Solution starts below. //////////////////////////////
+
+const int MAXN = 1e4+10;
+int n, m;
+bool vis[MAXN];
+vector<pii> adj[MAXN];
+
+bool dfs (int v, int bef) {
+	if (vis[v])
+		return false;
+	vis[v] = true;
+	for (pii p : adj[v])
+		if (p.y != bef && !dfs (p.x, p.y))
+			return false;
+	return true;
+}
+
+int main ()
+{
+	int a, b;
+	while (scanf ("%d %d", &n, &m) != EOF) {
+		for (int i = 1; i <= n; i++) {
+			vis[i] = false;
+			adj[i].clear();
+		}
+		while (m--) {
+			scanf ("%d %d", &a, &b);
+			adj[a].pb ({b, m});
+			adj[b].pb ({a, m});
+		}
+
+		bool ans = true;
+		for (int i = 1; i <= n; i++)
+			if (!vis[i])
+				if (!dfs (i, -10)) {
+					ans = false;
+					break;
+				}
+
+		printf ("%s\n", ans ? "Seguro" : "Inseguro");
+	}
+
+	return 0;
+}

@@ -1,0 +1,7 @@
+b = int(input())
+e = int(input())
+
+while (b > 10):
+    aux = b
+    while (aux):
+        b/=10

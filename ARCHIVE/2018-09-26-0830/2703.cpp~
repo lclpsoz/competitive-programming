@@ -1,0 +1,67 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+////////////// Prewritten code follows. Look down for solution. ////////////////
+#define x first
+#define y second
+#define len(x) ((int)(x).size())
+using pii = pair<int, int>;
+using ll = long long;
+using llu = long long unsigned;
+using ld = long double;
+
+const ld EPS = 1e-9;
+int cmp(ld x, ld y = 0, ld tol = EPS) {
+  return (x <= y + tol) ? (x + tol < y) ? -1 : 0 : 1;
+}
+
+const ll MOD = 1;
+ll mod (ll x, ll m = MOD) {
+  return ((x%m) + m)%m;
+}
+
+////////////////////////// Solution starts below. //////////////////////////////
+
+const int N = 1e5+10;
+
+int n, r;
+int size[N], link[N];
+priority_queue<pair<int, pii>> pq;
+
+int find (int v) {
+  return v == link[v] ? v : find (link[v]);
+}
+
+bool same (int v, int u) {
+  return find (v) == find (u);
+}
+
+void unite (int v, int u) {
+  if (size[v] < size[u])
+    swap (v, u);
+  link[u] = v;
+  size[v] += size[u];
+}
+
+int main () {
+  scanf ("%d %d", &n, &r);
+  for (int i = 1; i <= r; i++) {
+    int u, v, w;
+    scanf ("%d %d %d", &v, &u, &w);
+    pq.push ({-w, {v, u}}); 
+  }
+
+  int ans = 0;
+  while (!pq.empty()) {
+    int w = -pq.top().x;
+    int v = pq.top().y.x;
+    int u = pq.top().y.y;
+    if (!same (v, u)) {
+      unite (v, u);
+      ans += -w;
+    }
+  }
+  printf ("%d\n", ans);
+  
+  return 0;
+}

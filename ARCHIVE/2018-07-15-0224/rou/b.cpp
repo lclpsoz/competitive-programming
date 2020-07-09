@@ -1,0 +1,45 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+////////////// Prewritten code follows. Look down for solution. ////////////////
+#define x first
+#define y second
+#define pb push_back
+#define foreach(x, v) for (typeof (v).begin() x=(v).begin(); x !=(v).end(); ++x)
+#define For(i, a, b) for (int i=(a); i<(b); ++i)
+#define D(x) cerr << #x " is " << (x) << endl
+typedef pair<int, int> pii;
+typedef long long ll;
+const int INF = 1e9;
+
+const double EPS = 1e-9;
+int cmp(double x, double y = 0, double tol = EPS) {
+    return (x <= y + tol) ? (x + tol < y) ? -1 : 0 : 1;
+}
+
+////////////////////////// Solution starts below. //////////////////////////////
+
+int x, y;
+
+int main ()
+{
+	scanf ("%d %d", &x, &y);
+
+	long double a, b;
+	a = y*logl(x);
+	b = x*logl(y);
+	switch (cmp(a, b)) {
+		case 1:
+			putchar ('>');
+			break;
+		case 0:
+			putchar ('=');
+			break;
+		case -1:
+			putchar ('<');
+			break;
+	}
+	putchar ('\n');
+
+	return 0;
+}

@@ -1,0 +1,5 @@
+ar = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+
+while (True):
+    for i in ar:
+        print(i, sep='')

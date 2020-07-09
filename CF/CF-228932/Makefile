@@ -1,0 +1,1 @@
+CXXFLAGS = -Wall -Wextra -pedantic -Wshadow -Wformat=2 -Wfloat-equal -Wconversion -Wlogical-op -Wcast-qual -Wcast-align -Wsign-conversion		-fsanitize=address -fno-sanitize-recover -fstack-protector -fsanitize=undefined -Wshift-overflow=2 -Wduplicated-cond -std=c++14

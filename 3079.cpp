@@ -36,19 +36,24 @@ int main () {
 		vec.push_back({x, -1});
 	}
 	vec.back().y = m;
-	for(int i = m; i; i--) {
-		printf("%d\n", i);
-		bool ok = true;
-		for(int j = 1; j < n; j++) {
-			printf("  |%d, %d\n", vec[j].x, vec[j].y);
-			if(vec[j].x%i and ((vec[j].x/i + 1)*i) > vec[j].y) {
-				ok = false;
-				break;
+	for(int i = vec[1].y; i; i--) {
+		printf("k = %d\n", i);
+		for(int st = 0; st+i <= vec[1].y; st++) {
+			printf("  st = %d\n", st);
+			bool ok = true;
+			for(int j = 1; ok and j < n; j++) {
+				vec[j].x -= st;
+				vec[j].y -= st;
+				// printf("    [%d, %d]\n", vec[j].x, vec[j].y);
+				if(vec[j].x%i and ((vec[j].x/i + 1)*i) > vec[j].y)
+					ok = false;
+				vec[j].x += st;
+				vec[j].y += st;
 			}
-		}
-		if(ok) {
-			printf("%d\n", i);
-			exit(0);
+			if(ok) {
+				printf("%d\n", i);
+				exit(0);
+			}
 		}
 	}
 

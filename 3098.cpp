@@ -27,7 +27,7 @@ int dp[1010][1010];
 
 int solve(int l, int r) {
 	if(r < l) return 0;
-	if(l == r) return a[l] != 'a';
+	if(l == r) return (a[l] != 'a' and a[l] != 'A');
 	int &ret = dp[l][r];
 	if(ret != -1) return ret;
 	if(a[l] == 'a') a[l] = 'A';

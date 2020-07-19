@@ -25,7 +25,7 @@ inline int mod(ll x, int m = MOD) {
 int main () {
 	int n;
 	scanf("%d", &n);
-	int ans;
+	int ans = 0;
 	while(n--) {
 		int x;
 		scanf("%d", &x);

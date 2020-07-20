@@ -1,25 +1,39 @@
+# Ignores all files
 *
 
+# Don't ignore if have any extension or is a folder
 !*.*
 !*/
 
+# Not ignore if it's a Makefile
 !Makefile*
 
+# Ignores simple text files
 *.in*
 *.out*
 *.txt
 *.csv
 
+# Temp files from editors
 *.*~*
 *.*#*
 *.*swp*
 
-
+# Executables
 *.jar
 *.class
 *.exe
 
+# Misc
 *.png
 *.html
 *.ipynb*
 *.zip
+
+# Ignores all TPs files, except folder TP/
+*tp*.cpp*
+!TP/*
+
+# Ignores all Makefiles, except from root folder
+*Makefile*
+!Makefile*

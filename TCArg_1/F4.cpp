@@ -51,7 +51,7 @@ vector<int> cross(vector<int> &v1, vector<int> &v2, int m) {
 
 int main () {
 	int n, b, k, m;
-	int tt = 1;
+	int tt = 100;
 	while(tt--) {
 		vector<int> digits;
 		int qnt[15];
@@ -86,7 +86,7 @@ int main () {
 		}
 		int stCycle = mp[vec];
 		int sizeCycle = qNow-mp[vec];
-		printf("%3d: %d -> %d [%d]\n", m, mp[vec], qNow-1, sizeCycle);
+		// printf("%3d: %d -> %d [%d]\n", m, mp[vec], qNow-1, sizeCycle);
 
 		vector<int> ans(105, 0);
 		vec.clear();
@@ -99,20 +99,20 @@ int main () {
 
 		// Before Cycles
 		if(stCycle > 1) {
-			for(int i = 2; i < stCycle; i++) {
-				printf("vec in %2d: ", i);
+			for(int i = 2; i < min(b, stCycle); i++) {
+				// printf("vec in %2d: ", i);
 				for(int j = 0; j < len(vec); j++) {
 					vec[j] = (vec[j]*10)%m;
-					printf("%d ", vec[j]);
+					// printf("%d ", vec[j]);
 				}
-				putchar('\n');
+				// putchar('\n');
 				vector<int> ansNow(105, 0);
 				for(int v : vec)
 					ansNow[v] += 1;
 				vector<int> ax = cross(ans, ansNow, m);
-				printf("AX in %d:\n", i);
-				for(int j = 0; j < m; j++)
-					printf("%d: %d\n", j, ax[j]);
+				// printf("AX in %d:\n", i);
+				// for(int j = 0; j < m; j++)
+				// 	printf("%d: %d\n", j, ax[j]);
 				ans = ax;
 				lstPos = i;
 			}
@@ -121,44 +121,44 @@ int main () {
 		// In Cycles
 		// Needs vec updated
 		if(b >= stCycle+sizeCycle) {
-			printf("IN CYCLES!!!!!\n");
+			// printf("IN CYCLES!!!!!\n");
 			vector<int> ansCycle(105, 0);
-			printf("vec in st-1: ");
+			// printf("vec in st-1: ");
 			for(int j = 0; j < len(vec); j++) {
 				vec[j] = (vec[j]*10)%m;
-				printf("%d ", vec[j]);
+				// printf("%d ", vec[j]);
 			}
 			for(int v : vec)
 				ansCycle[v] += 1;
 			for(int i = stCycle+1; i < stCycle+sizeCycle; i++) {
-				printf("vec in %2d: ", i);
+				// printf("vec in %2d: ", i);
 				for(int j = 0; j < len(vec); j++) {
 					vec[j] = (vec[j]*10)%m;
-					printf("%d ", vec[j]);
+					// printf("%d ", vec[j]);
 				}
-				putchar('\n');
+				// putchar('\n');
 				vector<int> ansNow(105, 0);
 				for(int v : vec)
 					ansNow[v] += 1;
 				vector<int> ax = cross(ansCycle, ansNow, m);
-				printf("AX in %d:\n", i);
-				for(int j = 0; j < m; j++)
-					printf("%d: %d\n", j, ax[j]);
+				// printf("AX in %d:\n", i);
+				// for(int j = 0; j < m; j++)
+				// 	printf("%d: %d\n", j, ax[j]);
 				ansCycle = ax;
 			}
 			lstPos = stCycle+sizeCycle-1;
 			vector<int> ax = cross(ans, ansCycle, m);
-			printf("AX after ansCycle BASIC\n");
-			for(int j = 0; j < m; j++)
-				printf("%d: %d\n", j, ax[j]);
-			printf("-----------\n");
+			// printf("AX after ansCycle BASIC\n");
+			// for(int j = 0; j < m; j++)
+				// printf("%d: %d\n", j, ax[j]);
+			// printf("-----------\n");
 			ans = ax;
 			for(;lstPos+sizeCycle < b; lstPos += sizeCycle) {
 				vector<int> ax = cross(ans, ansCycle, m);
-				printf("AX after ansCycle INTERN\n");
-				for(int j = 0; j < m; j++)
-					printf("%d: %d\n", j, ax[j]);
-				printf("-----------\n");
+				// printf("AX after ansCycle INTERN\n");
+				// for(int j = 0; j < m; j++)
+				// 	printf("%d: %d\n", j, ax[j]);
+				// printf("-----------\n");
 				ans = ax;
 			}
 		}
@@ -167,28 +167,28 @@ int main () {
 		// Needs vec updated
 		// Needs lstPos updated
 		if(lstPos <= b) {
-			printf("AFTER CYCLES!!!!!\n");
+			// printf("AFTER CYCLES!!!!!\n");
 			for(int i = lstPos+1; i <= b; i++) {
-				printf("vec in %2d: ", i);
+				// printf("vec in %2d: ", i);
 				for(int j = 0; j < len(vec); j++) {
 					vec[j] = (vec[j]*10)%m;
-					printf("%d ", vec[j]);
+					// printf("%d ", vec[j]);
 				}
-				putchar('\n');
+				// putchar('\n');
 				vector<int> ansNow(105, 0);
 				for(int v : vec)
 					ansNow[v] += 1;
 				vector<int> ax = cross(ans, ansNow, m);
-				printf("AX in %d:\n", i);
-				for(int j = 0; j < m; j++)
-					printf("%d: %d\n", j, ax[j]);
+				// printf("AX in %d:\n", i);
+				// for(int j = 0; j < m; j++)
+				// 	printf("%d: %d\n", j, ax[j]);
 				ans = ax;
 				lstPos = i;
 			}
 		}
-		printf("\nANS:\n");
-		for(int j = 0; j < m; j++)
-			printf("%d: %d\n", j, ans[j]);
+		// printf("\nANS:\n");
+		// for(int j = 0; j < m; j++)
+		// 	printf("%d: %d\n", j, ans[j]);
 		printf("%d\n", ans[k]);
 	}
 

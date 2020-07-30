@@ -51,20 +51,25 @@ vector<int> cross(vector<int> &v1, vector<int> &v2, int m) {
 
 int main () {
 	int n, b, k, m;
-	int tt = 1;
-	while(tt--) {
+	for(int tt = 1; tt <= 1; tt++) {
 		vector<int> digits;
 		int qnt[15];
 		scanf("%d %d %d %d", &n, &b, &k, &m);
+		// if(tt == 44) {
+		// 	printf("%d %d %d %d\n", n, b, k, m);	
+		// }
 		memset(qnt, 0, sizeof qnt);
 		for(int i = 0; i < n; i++) {
 			int val;
 			scanf("%d", &val);
+			// if(tt == 44)
+			// 	printf("%d ", val);
 			qnt[val]++;
 		}
+		// putchar('\n');
 		for(int i = 1; i <= 9; i++)
 			if(qnt[i])
-				digits.push_back(i);
+				digits.push_back(i%m);
 
 		map<vector<int>, int> mp;
 		vector<int> vec = digits;
@@ -99,7 +104,7 @@ int main () {
 
 		// Before Cycles
 		if(stCycle > 1) {
-			for(int i = 2; i < stCycle; i++) {
+			for(int i = lstPos+1; i < min(b, stCycle); i++) {
 				// printf("vec in %2d: ", i);
 				for(int j = 0; j < len(vec); j++) {
 					vec[j] = (vec[j]*10)%m;
@@ -111,8 +116,8 @@ int main () {
 					ansNow[v] += 1;
 				vector<int> ax = cross(ans, ansNow, m);
 				// printf("AX in %d:\n", i);
-				for(int j = 0; j < m; j++)
-					// printf("%d: %d\n", j, ax[j]);
+				// for(int j = 0; j < m; j++)
+				// 	printf("%d: %d\n", j, ax[j]);
 				ans = ax;
 				lstPos = i;
 			}
@@ -120,70 +125,91 @@ int main () {
 
 		// In Cycles
 		// Needs vec updated
-		if(b > 10000) {
-			vector<vector<int>> allCycles(50000);
-			if(b >= stCycle+sizeCycle) {
-				// printf("IN CYCLES!!!!!\n");
-				vector<int> ansCycle(105, 0);
-				// printf("vec in st-1: ");
+		vector<vector<int>> allCycles(64);
+		if(b >= stCycle+sizeCycle) {
+			// printf("IN CYCLES!!!!!\n");
+			vector<int> ansCycle(105, 0);
+			// printf("vec in st-1: ");
+			vector<int> vec2 = vec;
+			// vec.clear();
+			// for(int i = 1; i <= 9; i++)
+			// 	for(int j = 0; j < qnt[i]; j++)
+			// 		vec.push_back(i%m);
+			for(int j = 0; j < len(vec); j++) {
+				vec[j] = (vec[j]*10)%m;
+				// vec2[j] = (vec2[j]*10)%m;
+				// printf("%d ", vec[j]);
+			}
+			for(int v : vec)
+				ansCycle[v] += 1;
+			// lstPos+2 because I have to count this above as a cycle
+
+			// TODO: THIS IS WRONG!!!
+			// The correct way is to get the cycle amounts separe,
+			// NOT to change vec to it starting state.
+			// lstPos++;
+			for(int i = 1; i < sizeCycle; i++) {
+				// printf("vec in %2d: ", i);
 				for(int j = 0; j < len(vec); j++) {
 					vec[j] = (vec[j]*10)%m;
+					// vec2[j] = (vec2[j]*10)%m;
 					// printf("%d ", vec[j]);
 				}
+				// putchar('\n');
+				vector<int> ansNow(105, 0);
+				// vector<int> ansNowVec2(105, 0);
 				for(int v : vec)
-					ansCycle[v] += 1;
-				for(int i = stCycle+1; i < stCycle+sizeCycle; i++) {
-					// printf("vec in %2d: ", i);
-					for(int j = 0; j < len(vec); j++) {
-						vec[j] = (vec[j]*10)%m;
-						// printf("%d ", vec[j]);
-					}
-					putchar('\n');
-					vector<int> ansNow(105, 0);
-					for(int v : vec)
-						ansNow[v] += 1;
-					vector<int> ax = cross(ansCycle, ansNow, m);
-					// printf("AX in %d:\n", i);
-					// for(int j = 0; j < m; j++)
-					// 	printf("%d: %d\n", j, ax[j]);
-					ansCycle = ax;
-				}
-				lstPos = stCycle+sizeCycle-1;
-				vector<int> ax = cross(ans, ansCycle, m);
-				// printf("AX after ansCycle BASIC\n");
+					ansNow[v] += 1;
+				// for(int v : vec2)
+				// 	ansNowVec2[v] += 1;
+				vector<int> ax = cross(ansCycle, ansNow, m);
+				// printf("ansCycle in %d:\n", i);
+				// for(int j = 0; j < m; j++)
+				// 	printf("%d: %d\n", j, ax[j]);
+				ansCycle = ax;
+				// lstPos++;
+			}
+			// vector<int> ax = cross(ans, ansCycle, m);
+			// // printf("AX after ansCycle BASIC, lstPos = %d\n", lstPos);
+			// // for(int j = 0; j < m; j++)
+			// // 	printf("%d: %d\n", j, ax[j]);
+			// // printf("-----------\n");
+			// ans = ax;
+			vec = vec2;
+
+			allCycles[0] = ansCycle;
+			for(int i = 1; i < 64; i++) {
+				vector<int> ax = cross(allCycles[i-1], allCycles[i-1], m);
+				// printf("DOUBLE!!! after ansCycle INTERN\n");
 				// for(int j = 0; j < m; j++)
 				// 	printf("%d: %d\n", j, ax[j]);
 				// printf("-----------\n");
-				ans = ax;
-
-				allCycles[0] = ansCycle;
-				for(int i = 1; i < 40; i++) {
-					ax = cross(allCycles[i-1], allCycles[i-1], m);
-					// printf("DOUBLE!!! after ansCycle INTERN\n");
+				allCycles[i] = ax;
+			}
+			ll pp2 = 65536*1LL*65536;
+			// ll pp2 = 1;
+			// printf("\nANS:\n");
+			// for(int j = 0; j < m; j++)
+			// 	printf("%d: %d\n", j, ans[j]);
+			for(int b2 = 32; b2 >= 0;b2--) {
+				for(;lstPos+pp2*sizeCycle < b;) {
+					vector<int> ax2 = cross(ans, allCycles[b2], m);
+					lstPos += pp2*sizeCycle;
+					// printf("b2 = %d, pp2 = %lld, sizeCycle = %d\n", b2, pp2, sizeCycle);
+					// printf("AX after ansCycle INTERN lstPos = %d\n", lstPos);
 					// for(int j = 0; j < m; j++)
-					// 	printf("%d: %d\n", j, ax[j]);
+					// 	printf("%d: %d\n", j, allCycles[b2][j]);
 					// printf("-----------\n");
-					allCycles[i] = ax;
+					ans = ax2;
 				}
-				int pp2 = 65536;
-				for(int b2 = 16; b2 >= 1;b2--) {
-					for(;lstPos+pp2*sizeCycle < b; lstPos += pp2*sizeCycle) {
-						vector<int> ax = cross(ans, allCycles[b2], m);
-						// printf("AX after ansCycle INTERN\n");
-						// for(int j = 0; j < m; j++)
-						// 	printf("%d: %d\n", j, ax[j]);
-						// printf("-----------\n");
-						ans = ax;
-					}
-					pp2/=2;
-				}
+				pp2/=2;
 			}
 		}
 
 		// After cycle
 		// Needs vec updated
 		// Needs lstPos updated
-		if(lstPos <= b) {
+		if(lstPos < b) {
 			// printf("AFTER CYCLES!!!!!\n");
 			for(int i = lstPos+1; i <= b; i++) {
 				// printf("vec in %2d: ", i);

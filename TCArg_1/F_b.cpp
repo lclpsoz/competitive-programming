@@ -98,89 +98,27 @@ int main () {
 		int lstPos = 1;
 
 		// Before Cycles
-		if(stCycle > 1) {
-			for(int i = 2; i < stCycle; i++) {
-				// printf("vec in %2d: ", i);
-				for(int j = 0; j < len(vec); j++) {
-					vec[j] = (vec[j]*10)%m;
-					// printf("%d ", vec[j]);
-				}
-				// putchar('\n');
-				vector<int> ansNow(105, 0);
-				for(int v : vec)
-					ansNow[v] += 1;
-				vector<int> ax = cross(ans, ansNow, m);
-				// printf("AX in %d:\n", i);
-				// for(int j = 0; j < m; j++)
-				// 	printf("%d: %d\n", j, ax[j]);
-				// ans = ax;
-				lstPos = i;
-			}
-		}
-
-		// In Cycles
-		// Needs vec updated
-		if(b >= stCycle+sizeCycle) {
-			// printf("IN CYCLES!!!!!\n");
-			vector<int> ansCycle(105, 0);
-			// printf("vec in st-1: ");
+		for(int i = 2; i <= b; i++) {
+			// printf("vec in %2d: ", i);
 			for(int j = 0; j < len(vec); j++) {
 				vec[j] = (vec[j]*10)%m;
 				// printf("%d ", vec[j]);
 			}
+			// putchar('\n');
+			vector<int> ansNow(105, 0);
 			for(int v : vec)
-				ansCycle[v] += 1;
-			for(int i = stCycle+1; i < stCycle+sizeCycle; i++) {
-				// printf("vec in %2d: ", i);
-				for(int j = 0; j < len(vec); j++) {
-					vec[j] = (vec[j]*10)%m;
-					// printf("%d ", vec[j]);
-				}
-				// putchar('\n');
-				vector<int> ansNow(105, 0);
-				for(int v : vec)
-					ansNow[v] += 1;
-				vector<int> ax = cross(ansCycle, ansNow, m);
-				// printf("AX in %d:\n", i);
-				// for(int j = 0; j < m; j++)
-				// 	printf("%d: %d\n", j, ax[j]);
-				ansCycle = ax;
-			}
-			lstPos = stCycle+sizeCycle-1;
-			vector<int> ax = cross(ans, ansCycle, m);
-			// printf("AX after ansCycle\n");
+				ansNow[v] += 1;
+			vector<int> ax = cross(ans, ansNow, m);
+			// printf("AX in %d:\n", i);
 			// for(int j = 0; j < m; j++)
 			// 	printf("%d: %d\n", j, ax[j]);
-			// printf("-----------\n");
 			ans = ax;
+			lstPos = i;
 		}
 
-		// After cycle
-		// Needs vec updated
-		// Needs lstPos updated
-		if(lstPos <= b) {
-			// printf("AFTER CYCLES!!!!!\n");
-			for(int i = lstPos+1; i <= b; i++) {
-				// printf("vec in %2d: ", i);
-				for(int j = 0; j < len(vec); j++) {
-					vec[j] = (vec[j]*10)%m;
-					// printf("%d ", vec[j]);
-				}
-				// putchar('\n');
-				vector<int> ansNow(105, 0);
-				for(int v : vec)
-					ansNow[v] += 1;
-				vector<int> ax = cross(ans, ansNow, m);
-				// printf("AX in %d:\n", i);
-				// for(int j = 0; j < m; j++)
-				// 	printf("%d: %d\n", j, ax[j]);
-				ans = ax;
-				lstPos = i;
-			}
-		}
-		printf("\nANS:\n");
-		for(int j = 0; j < m; j++)
-			printf("%d: %d\n", j, ans[j]);
+		// printf("\nANS:\n");
+		// for(int j = 0; j < m; j++)
+		// 	printf("%d: %d\n", j, ans[j]);
 		printf("%d\n", ans[k]);
 	}
 

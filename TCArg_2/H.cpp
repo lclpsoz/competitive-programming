@@ -30,13 +30,14 @@ using ordered_set = __gnu_pbds::tree<T, M, less<T>, __gnu_pbds::rb_tree_tag, __g
 
 ////////////////////////// Solution starts below. //////////////////////////////
 
-const int N = 2e5 + 10;
+const int INF = 1e9;
+const int N = 1e5 + 10;
 
 int n, m, k, s, t;
 int link[N], sz[N];
 vector<int> marked;
-vector<pii> adj[N];
-bool vis_edge[N], marked_vert[N];
+vector<int> adj[N];
+int vis[N];
 int mini_vert[N], mini_dist[N];
 
 int find(int x) {
@@ -58,34 +59,30 @@ void unite(int x, int y) {
 	link[x] = y;
 }
 
-void dfs(int v, int q) {
-	if(q < 0) return;
-	printf("      q = %d, v = %d\n", q, v);
-	for(auto p : adj[v]) {
-		if(!vis_edge[p.y]) {
-			vis_edge[p.y] = 1;
-			if(!same(v, p.x))
-				unite(v, p.x);
-			dfs(p.x, q-1);
-		}
-	}
-}
+// void dfs(int v, int q) {
+// 	if(q < 0) return;
+// 	printf("      q = %d, v = %d\n", q, v);
+// 	for(auto p : adj[v]) {
+// 		if(!vis_edge[p.y]) {
+// 			vis_edge[p.y] = 1;
+// 			if(!same(v, p.x))
+// 				unite(v, p.x);
+// 			dfs(p.x, q-1);
+// 		}
+// 	}
+// }
+queue<pair<int, pii>> bfs;
+queue<pii> bfs2;
 
 bool eval(int q) {
-	memset(vis_edge, 0, sizeof(vis_edge));
-	memset(marked_vert, 0, sizeof(marked_vert));
-	memset(mini_vert, -1, sizeof(mini_vert));
 	for(int i = 1; i <= n; i++) {
 		link[i] = i;
-		mini_dist[i] = 1e9;
 		sz[i] = 1;
 	}
-	printf("q = %d\n", q);
-	queue<pair<int, pii>> bfs;
+	// printf("q = %d\n", q);
 	for(int v : marked) {
-		bfs.push({v, {v, q}});
+		bfs.push({v, {v, 0}});
 		mini_vert[v] = v;
-		mini_dist[v] = 0;
 		// printf("  mk = %d\n", v);
 		// printf("    ");
 		// for(int i = 1; i <= n; i++)
@@ -93,24 +90,49 @@ bool eval(int q) {
 		// dfs(v, q);
 	}
 	while(LEN(bfs)) {
-		int v, rep, qnt;
+		int v, rep, dist;
 		auto now = bfs.front();
 		v = now.x;
 		rep = now.y.x;
-		qnt = now.y.y;
+		dist = now.y.y;
 		bfs.pop();
-		--qnt;
-		for(auto p : adj[v]) {
-			// vis_edge[p.y] = 1;
-			if(marked_vert[rep] and marked_vert[p.x] and !same(rep, p.x))
-				unite(rep, p.x);
-			printf("  rep = %d, v = %d, p.x = %d\n", rep, v, p.x);
-			if(qnt)
-				bfs.push({p.x, {rep, qnt-1}});
-		}		
+		// if(dist and mini_dist[v] == INF and v == t and !same(v, rep))
+		// 	unite(rep, v);
+		if(vis[v] == q) {
+			// printf("    v = %d, rep = %d, mini_d = %d, mini_v = %d, d = %d\n", v, rep, mini_dist[v], mini_vert[v], dist);
+			if(mini_dist[v]+dist <= q and !same(rep, mini_vert[v]))
+				unite(rep, mini_vert[v]);
+			continue;
+		}
+		vis[v] = q;
+		mini_dist[v] = dist;
+		mini_vert[v] = rep;
+		if(dist < q)
+			for(int u : adj[v]) {
+				// vis_edge[p.y] = 1;
+				// printf("  rep = %d, v = %d, u = %d, dist = %d\n", rep, v, u, dist+1);
+				bfs.push({u, {rep, dist + 1}});
+			}		
 	}
-	for(int i = 1; i <= n; i++)
-		printf("%d%c", find(i), " \n"[i==n]);
+	if(!same(s, t)) {
+		bfs2.push({t, 0});
+		while(LEN(bfs2)) {
+			int v, dist;
+			tie(v, dist) = bfs2.front();
+			bfs2.pop();
+			if(same(s, v)) {
+				unite(s, t);
+				break;
+			}
+			if(vis[v] == INF+q) continue;
+			vis[v] = INF+q;
+			if(dist < q)
+				for(int u : adj[v])
+					bfs2.push({u, dist+1});
+		}
+		while(!bfs2.empty()) bfs2.pop();
+	}
+	// printf("%d %d %d %d\n", s, t, find(s), find(t));
 	return same(s, t);
 }
 
@@ -125,20 +147,16 @@ int main () {
 		marked.push_back(x);
 	}
 
-	map<pii, int> mp;
 	for(int i = 0; i < m; i++) {
 		int u, v;
 		scanf("%d %d", &u, &v);
 		if(u > v) swap(u, v);
-		mp[{u, v}] = i;
-	}
-	for(auto p : mp) {
-		adj[p.x.x].push_back({p.x.y, p.y});
-		adj[p.x.y].push_back({p.x.x, p.y});
+		adj[u].push_back(v);
+		adj[v].push_back(u);
 	}
 	scanf("%d %d", &s, &t);
 	int l, r;
-	l = 1, r = m;
+	l = 1, r = 2*n+10;
 	while(l < r) {
 		int md = (l+r)/2;
 		if(eval(md))
@@ -146,7 +164,10 @@ int main () {
 		else
 			l = md+1;
 	}
-	printf("%d\n", l);
+	if(r == 2*n+10)
+		printf("-1\n");
+	else
+		printf("%d\n", l);
 
 	return 0;
 }

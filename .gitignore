@@ -36,4 +36,4 @@
 
 # Ignores all Makefiles, except from root folder
 *Makefile*
-!Makefile*
+!/Makefile*

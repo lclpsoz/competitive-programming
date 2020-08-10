@@ -30,232 +30,144 @@ using ordered_set = __gnu_pbds::tree<T, M, less<T>, __gnu_pbds::rb_tree_tag, __g
 
 ////////////////////////// Solution starts below. //////////////////////////////
 
+const int N = 505;
 
-int a[600], perm[600], b[600];
-vector<int> vec;
 int t, n;
-map<int, vector<int>> mp;
-vector<int> tmp;
+int inp[N], inp_sorted[N], perm[N];
+vector<pair<int, int>> seq;
+map<int, vector<int>> val_perm;
+set<int> values;
+vector<int> ans;
 
-void prt(int *aux) {
-	return;
-	printf("_____________________________\n");
+void sw(int pos) {
+	swap(seq[pos], seq[pos+1]);
+	swap(seq[pos], seq[pos+2]);
+	ans.push_back(pos);
+}
+
+pii count_inv() {
+	pii qnt_inv = {0, 0};
+	vector<pii> aux;
+	for(pii p : seq)
+		aux.push_back(p);
 	for(int i = 1; i <= n; i++)
-		printf("%d%c", aux[i], " \n"[i==n]);
-	printf("_____________________________\n");
-}
-
-void sw(int pos, int *aux, bool ans) {
-	// printf("  sw(pos = %d)!\n", pos);
-	swap(aux[pos], aux[pos+1]);
-	swap(aux[pos], aux[pos+2]);
-	if(ans) vec.push_back(pos);
-}
-
-void bs() {
-	// printf("---------------- START BS ----------------\n");
-	for(int i = 1; i <= n; i++)
-			for(int j = n-2; j >= i; j--) {
-				if(perm[j+2] < perm[j+1] and perm[j+2] < perm[j]) {
-					sw(j, a, true);
-					sw(j, perm, false);
-				}
-				if(j == i and perm[j] > perm[j+1]) {
-					sw(j, a, true);
-					sw(j, a, true);
-					sw(j, perm, false);
-					sw(j, perm, false);
-				}
-				// printf("......\n");
-				// printf("perm:\n");
-				// prt(perm);
-				// prt(a);
-				// printf("......\n");
-			}
-	// printf("---------------- END BS ----------------\n");
-}
-
-int countInv(int *data) {
-	int qntInv = 0;
-	int aux[600];
-	for(int i = 1; i <= n; i++) aux[i] = data[i];
-	for(int i = 1; i <= n; i++)
-		for(int j = n-1; j >= i; j--)
-			if(aux[j] > aux[j+1]) {
-				qntInv++;
-				swap(aux[j], aux[j+1]);
-			}
-	return qntInv;
-}
-
-void invForce() {
-	if(countInv(perm)%2) {
-			bool check = false;
-			for(int i = 1; i < n-2; i++)
-				if(a[i] == a[i+1] and a[i+2] != a[i+3]) {
-					swap(a[i+2], a[i+3]);
-					swap(perm[i+2], perm[i+3]);
-					vec.push_back(i);
-					vec.push_back(i);
-					vec.push_back(i+1);
-					vec.push_back(i+1);
-					check = true;
-					break;
-				}
-			if(!check) {
-				// assert(false);
-				for(int i = n; i >= 4; i--)
-					if(a[i] == a[i-1] and a[i-2] != a[i-3]) {
-						swap(a[i-2], a[i-3]);
-						swap(perm[i-2], perm[i-3]);
-						vec.push_back(i-3);
-						vec.push_back(i-3);
-						vec.push_back(i-2);
-						vec.push_back(i-2);
-						break;
-					}
-			}
+		for(int j = n-1; j >= i; j--) {
+			if(aux[j].x > aux[j+1].x)
+				swap(aux[j].x, aux[j+1].x), qnt_inv.x++;
+			if(aux[j].y > aux[j+1].y)
+				swap(aux[j].y, aux[j+1].y), qnt_inv.y++;
 		}
+
+	return qnt_inv;
+}
+
+void prt(bool value) {
+	for(int i = 1; i <= n; i++)
+		printf("%d%c", value ? seq[i].y : seq[i].x, " \n"[i==n]);
 }
 
 int main () {
-	// ios_base::sync_with_stdio(false);
-    // cin.tie(NULL);
-    // cout.precision(10);
 	scanf("%d", &t);
-	// printf("%d\n", t);
 	while(t--) {
-		// printf("================ START ================\n");
-		vec.clear();
+		seq.clear();
+		val_perm.clear();
+		ans.clear();
+		values.clear();
+
 		scanf("%d", &n);
 		for(int i = 1; i <= n; i++) {
-			scanf("%d", &a[i]);
-			// printf("%d%c", a[i], " \n"[i==n]);
-			b[i] = a[i];
+			scanf("%d", &inp[i]);
+			inp_sorted[i] = inp[i];
+			values.insert(inp[i]);
 		}
-		sort(b+1, b+n+1);
+		sort(inp_sorted+1, inp_sorted+n+1);
 		for(int i = 1; i <= n; i++) {
-			if(mp.count(b[i]) == 0)
-				mp[b[i]] = { i };
+			int v = inp_sorted[i];
+			if(val_perm.count(v) == 0)
+				val_perm[v] = { i };
 			else
-				mp[b[i]].push_back(i);
+				val_perm[v].push_back(i);
 		}
-		// printf("PERM:\n");
+		for(auto piv : val_perm) {
+			sort(ALL(val_perm[piv.x]));
+			reverse(ALL(val_perm[piv.x]));
+		}
+		seq.push_back({-1, -1});
 		for(int i = 1; i <= n; i++) {
-			perm[i] = mp[a[i]].back();
-			// printf("%d%c", perm[i], " \n"[i==n]);
-			mp[a[i]].pop_back();
+			seq.push_back({val_perm[inp[i]].back(), inp[i]});
+			val_perm[inp[i]].pop_back();
 		}
-		// printf("  || 0. INVs = %d, %d\n", countInv(a), countInv(perm));
-		mp.clear();
-		if(countInv(a)%2) {
-			int val = -1;
-			for(int i = 1; i < n; i++) {
-				// printf("| %d %d\n", b[i], b[i+1]);
-				if(b[i] == b[i+1]) {
-					val = b[i];
+
+		pii qnt_inv = count_inv();
+		if(qnt_inv.y%2 == 1 and LEN(values) == n) {
+			printf("-1\n");
+			continue;
+		}
+
+		qnt_inv = count_inv();
+		if(qnt_inv.y%2 == 1) {
+			// Minimum operations to put two equal values together.
+			bool ok = false;
+			for(int dist = 1; dist < n and !ok; dist++)
+				for(int i = 1; i <= n-dist and !ok; i++) 
+					if(seq[i].y == seq[i+dist].y) {
+						if(dist > 1) {
+							int pos = i;
+							while(seq[pos].y != seq[pos+1].y and
+									(pos == 1 or seq[pos-1].y != seq[pos].y)) {
+								sw(max(1, pos-1));
+								++pos;
+							}
+						}
+						ok = true;
+					}
+		}
+
+		qnt_inv = count_inv();
+		if(qnt_inv.y%2) {			
+			// Add or remove one invertion.
+			bool ok = false;
+			for(int i = 1; i <= n-3; i++)
+				if(seq[i].y == seq[i+1].y) {
+					swap(seq[i].x, seq[i+1].x);
+					sw(i); sw(i);
+					sw(i+1); sw(i+1);
+					ok = true;
 					break;
 				}
-			}
-			if(val == -1) {
-				printf("-1\n");
-				continue;
-			}
-			if(countInv(a)%2 != countInv(perm)%2) {
-				tmp.clear();
-				// printf("val = %d\n", val);
-				for(int i = 1; i <= n; i++) {
-					if(a[i] == val and (LEN(tmp) == 0 or (i-tmp.back())%2 == 1)) {
-						tmp.push_back(i);
-						if(LEN(tmp)==2)
-							break;
-
+			if(!ok)
+				for(int i = n; i > n-2; i--)
+					if(seq[i].y == seq[i-1].y) {
+						swap(seq[i].x, seq[i-1].x);
+						// printf("i = %d\n", i);
+						if(i-3 < 1) sw(i-1), ++i;
+						sw(i-3); sw(i-3);
+						sw(i-2); sw(i-2);
+						break;
 					}
+		} else if(qnt_inv.x%2) {
+			for(int i = 1; i < n; i++)
+				if(seq[i].y == seq[i+1].y) {
+					swap(seq[i].x, seq[i+1].x);
+					break;
 				}
-				// printf("%d\n", LEN(tmp));
-				if(LEN(tmp) == 1) {
-					// for(int i = 1; i <= n; i++)
-					// 	printf("%d: %d\n", i, a[i]);
-					for(int i = 1; i <= n; i++) {
-						if(a[i] == val) {
-							// printf("here!!\n");
-							sw(min(i, n-2), a, true);
-							sw(min(i, n-2), perm, false);
-							break;
-						}
-					}
-					tmp.clear();
-					for(int i = 1; i <= n; i++) {
-						// printf("%d: %d\n", i, a[i]);
-						if(a[i] == val and (LEN(tmp) == 0 or (i-tmp.back())%2 == 1)) {
-							tmp.push_back(i);
-							if(LEN(tmp)==2)
-								break;
-
-						}
-					}
-				}
-						// tmp.push_back(i);
-				swap(perm[tmp[0]], perm[tmp[1]]);
+		}
+		qnt_inv = count_inv();
+		// Bubblesort
+		for(int i = 1; i <= n; i++)
+			for(int j = n-2; j >= i; j--) {
+				int mini = min(min(seq[j].x, seq[j+1].x), seq[j+2].x);
+				if(seq[j+2].x == mini)
+					sw(j);
+				while(j == i and seq[j].x != mini)
+					sw(j);
 			}
-			// for(int i = 1; i < n; i++) {
-			// 	// printf("||val = %d, %d %d\n", val, a[i], a[i+1]);
-			// 	if(a[i] == val and a[i-1] != val) {
-			// 		swap(a[i], a[i+1]);
-			// 		// printf("  HERE!!\n");
-			// 		break;
-			// 	}
-			// }
+		qnt_inv = count_inv();
+		printf("%d\n", LEN(ans));
+		for(int i = 0; i < LEN(ans); i++) {
+			printf("%d", ans[i]);
+			if(i < LEN(ans)-1) putchar(' ');
 		}
-		prt(a);
-		// printf("perm:\n");
-		prt(perm);
-		bs();
-		// printf("--------------------------------------------\n");
-		prt(a);
-		// printf("perm:\n");
-		prt(perm);
-		// printf("  || BS | 1. LEN = %d, INVs = %d\n", LEN(vec), countInv(a));
-		invForce();
-		prt(a);
-		// printf("  || 2. LEN = %d, INVs = %d\n", LEN(vec), countInv(a));
-		bs();
-		prt(a);
-		// printf("  || 3. BS | LEN = %d, INVs = %d\n", LEN(vec), countInv(a));
-		// invForce();
-		prt(a);
-		// printf("  || 4. LEN = %d, INVs = %d\n", LEN(vec), countInv(a));
-		// bs();
-		prt(a);
-		// printf("  || 5. BS | LEN = %d, INVs = %d\n", LEN(vec), countInv(a));
-		prt(a);
-		prt(perm);
-		if(a[n-1] > a[n] or a[n-2] > a[n-1]) {
-			sw(n-2, a, true);
-			sw(n-2, perm, false);
-		}
-		prt(a);
-		prt(perm);
-		if(a[n-1] > a[n] or a[n-2] > a[n-1]) {
-			sw(n-2, a, true);
-			sw(n-2, perm, false);
-		}
-		prt(a);
-		prt(perm);
-		// printf("  || 6. INVs = %d\n", countInv(perm));
-		// assert(!((a[n-1] > a[n] or a[n-2] > a[n-1])));
-		// printf("----- st\n");
-		// // for(int i = 1; i <= n; i++)
-		// // 	printf("%d%c", a[i], " \n"[i==n]);
-		// printf("-----en\n");
-		// if(a[n-2] > a[n-1] or a[n-3] > a[n-2] and qntInv%2 == 1)
-		// 	sort(a+n-3, a+n);
-		// assert(LEN(vec) <= n*n);
-		// assert(countInv(a)%2 == 0);
-		printf("%d\n", LEN(vec));
-		if(LEN(vec)) printf("%d", vec[0]);
-		for(int i = 1; i < LEN(vec); i++)
-			printf(" %d", vec[i]);
 		putchar('\n');
 	}
 

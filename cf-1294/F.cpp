@@ -36,32 +36,46 @@ vector<int> adj[N];
 int dist = 0, vert;
 bool vis[N];
 queue<pii> q;
+set<pii> ans;
 
-void far(int v, int d) {
-	if(vis[v]) return;
-	// cout << v << ' ' << d << '\n';
+void far(int v, int d, int p) {
 	if(d > dist) {
 		vert = v;
 		dist = d;
 	}
-	vis[v] = 1;
-	for(int u : adj[v]) {
-		far(u, d+1);
-	}
+	for(int u : adj[v])
+		if(u != p)
+			far(u, d+1, v);
 }
 
-bool dfs(int v, int targ) {
-	if(vis[v]) return 0;
-	vis[v] = 1;
+bool dfs(int v, int targ, int p) {
 	if(v == targ) {
 		q.push({v, 0});
 		return true;
 	} else {
 		for(int u : adj[v])
-			if(dfs(u, targ)) {
+			if(u != p and dfs(u, targ, v)) {
 				q.push({u, 0});
 				return true;
 			}
+	}
+	return false;
+}
+
+
+bool getPath(int v, int targ, int p) {
+	if(v == targ) {
+		return true;
+	} else {
+		for(int u : adj[v]) {
+			if(u != p and getPath(u, targ, v)) {
+				if(u < v)
+					ans.insert({u, v});
+				else
+					ans.insert({v, u});
+				return true;
+			}
+		}
 	}
 	return false;
 }
@@ -71,8 +85,7 @@ int main () {
     cin.tie(NULL);
     // cout.precision(10);
 	cin >> n;
-	--n;
-	while(n--) {
+	for(int i = 1; i <= n-1; i++) {
 		int x, y;
 		cin >> x >> y;
 		adj[x].push_back(y);
@@ -80,34 +93,54 @@ int main () {
 	}
 	
 
-	far(1, 1);
-	memset(vis, 0, sizeof vis);
+	far(1, 1, 1);
 	int u = vert;
 	dist = 0;
-	far(u, 1);
+	far(u, 1, u);
 	int v = vert;
-	memset(vis, 0, sizeof vis);
-	dfs(u, v);
+	dfs(u, v, u);
+	q.push({u, 0});
 
+	if(dist == n) {
+		cout << n-1 << '\n';
+		int ax = 1;
+		while(u == ax or v == ax) ++ax;
+		cout << u << ' ' << v << ' ' << ax << '\n';
+		exit(0);
+	}
 	memset(vis, 0, sizeof vis);
-	int ans = u, maxi = 0;
+	int lst = u, maxi = 0;
 	while(!q.empty()) {
 		pii p = q.front();
 		q.pop();
-		int v = p.x;
+		int vv = p.x;
 		int d = p.y;
-		if(vis[v]) continue;
-		vis[v] = 1;
+		if(vis[vv]) continue;
+		// cout << "vv = " << vv << " d = " << d << '\n';
+		vis[vv] = 1;
 		if(d > maxi) {
 			maxi = d;
-			ans = v;
+			lst = vv;
 		}
-		for(int u : adj[v]) {
-			q.push({u, d+1});
+		for(int uu : adj[vv]) {
+			q.push({uu, d+1});
 		}
 	}
-	cout << maxi+dist-1 << '\n';
-	cout << u << ' ' << v << ' ' << ans << '\n';
+	// cout << "maxi = " << maxi << " lst = " << lst << '\n';
+	memset(vis, 0, sizeof vis);
+	getPath(u, v, u);
+	memset(vis, 0, sizeof vis);
+	getPath(u, lst, u);
+	memset(vis, 0, sizeof vis);
+	getPath(v, lst, v);
+	// for(auto p : ans)
+	// 	cout << p.x << ' ' << p.y << '\n';
+	while(u == lst or v == lst) {
+		lst++;
+		if(lst == n) lst = 1;
+	}
+	cout << LEN(ans) << '\n';
+	cout << u << ' ' << v << ' ' << lst << '\n';
 
 	return 0;
 }

@@ -29,12 +29,66 @@ using ordered_set = __gnu_pbds::tree<T, M, less<T>, __gnu_pbds::rb_tree_tag, __g
 
 ////////////////////////// Solution starts below. //////////////////////////////
 
+const int N = 2e5 + 10;
 
+int n, q;
+int segs[2][4*N];
+
+void upd(int *seg, int p, int val, int node, int l, int r) {
+	if(l <= p and p <= r) { 
+		seg[node] = max(val, seg[node]);
+		if(l < r) {
+			int node_l = 2*node;
+			int node_r = 2*node+1;
+			upd(seg, p, val, node_l, l, (l+r)/2);
+			upd(seg, p, val, node_r, (l+r)/2 + 1, r);
+		}
+	}
+}
+
+int qry(int *seg, int val, int node, int l, int r) {
+	if(seg[node] >= val) { 
+		if(l < r) {
+			int node_l = 2*node;
+			int node_r = 2*node+1;
+			int ret = qry(seg, val, node_l, l, (l+r)/2);
+			if(ret)
+				return ret;
+			return qry(seg, val, node_r, (l+r)/2 + 1, r);
+		} else
+			return l;
+	} else
+		return 0;
+}
 
 int main () {
-	// ios_base::sync_with_stdio(false);
-    // cin.tie(NULL);
-    // cout.precision(10);
+	ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+    cout.precision(10);
+
+	cin >> n >> q;
+	ll ans = 0;
+	upd(segs[0], n, n, 1, 1, n);
+	upd(segs[1], n, n, 1, 1, n);
+	while(q--) {
+		int opt, x;
+		cin >> opt >> x;
+		if(opt == 1) {
+			int maxi = qry(segs[0], x, 1, 1, n);
+			maxi--;
+			// cout << "maxi = " << maxi << '\n';
+			ans += maxi-1;
+			upd(segs[1], x, maxi, 1, 1, n);
+		}
+		else {
+			int maxi = qry(segs[1], x, 1, 1, n);
+			maxi--;
+			// cout << "maxi = " << maxi << '\n';
+			ans += maxi-1;
+			upd(segs[0], x, maxi, 1, 1, n);
+		}
+	}
+	cout << (n-2)*1ll*(n-2) - ans << '\n';
 
 	return 0;
 }

@@ -29,12 +29,59 @@ using ordered_set = __gnu_pbds::tree<T, M, less<T>, __gnu_pbds::rb_tree_tag, __g
 
 ////////////////////////// Solution starts below. //////////////////////////////
 
+const int N = 5e5 + 10;
 
+int n, q;
+map<int, int> mp;
+int bit[N], c[N];
+
+void add(int p, int v) {
+	for(int i = p; i < N; i +=i&-i)
+		bit[i] += v;
+}
+
+int sum(int p) {
+	int ret = 0;
+	for(int i = p; i; i-=i&-i)
+		ret += bit[i];
+	return ret;
+}
 
 int main () {
-	// ios_base::sync_with_stdio(false);
-    // cin.tie(NULL);
-    // cout.precision(10);
+	ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+    cout.precision(10);
+
+	cin >> n >> q;
+	for(int i = 1; i <= n; i++)
+		cin >> c[i];
+
+	vector<pair<pii, int>> queries;
+	for(int i = 1; i <= q; i++) {
+		int l, r;
+		cin >> l >> r;
+		queries.push_back({{r, l}, i});
+	}
+	sort(ALL(queries));
+	int lst = 1;
+	mp[c[1]] = 1;
+	add(1, 1);
+	vector<pii> ans;
+	for(auto p : queries) {
+		int r = p.x.x, l = p.x.y;
+		while(lst < r) {
+			lst++;
+			int val = c[lst];
+			if(mp.count(val))
+				add(mp[val], -1);
+			add(lst, 1);
+			mp[val] = lst;
+		}
+		ans.push_back({p.y, sum(r) - sum(l-1)});
+	}
+	sort(ALL(ans));
+	for(auto p : ans)
+		cout << p.y << '\n';
 
 	return 0;
 }

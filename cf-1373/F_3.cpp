@@ -80,15 +80,28 @@ int main () {
 			cout << "NO\n";
 		else {
 			int l = 0, r = max_transf;
-			bool ans = true;
-			for(int i = 1; ans and i <= n; i++)
-				if(prod[i]+r < need[i])
-					ans = false;
-				else if(i < n) {
-					int r1;
-					r1 = min(need[i+1], prod[i]-(need[i]-r));
-				}
-			cout << (ans ? "YES" : "NO") << '\n';
+			int pow2 = 1;
+			int qntOK = 0;
+			// for(int i = 1; i < max_transf; i++)
+			// 	qntOK += eval(i) == OK;
+			// if(qntOK)
+			// 	for(int i = 0; i <= max_transf; i++)
+			// 		cout << setw(2) << i << ": " << eval(i) << '\n';
+			while(l < r) {
+				// if(qntOK)
+				// 	cout << "l = " << l << ", r = " << r << ", pow2 = "<< pow2 << '\n';
+				int md = (l+r)/2;
+				int v = eval(md);
+				if(v < n)
+					l = md+1;
+				else if(v == OK)
+					l = r = md;
+				else
+					r = md-1;
+			}
+			// cout << "L = " << l << '\n';
+			cout << (eval(l) == OK ? "YES" : "NO") << '\n';
+			// if(qntOK) exit(0);
 		}
 
 

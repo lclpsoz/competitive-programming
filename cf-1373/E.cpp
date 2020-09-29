@@ -29,128 +29,65 @@ using ordered_set = __gnu_pbds::tree<T, M, less<T>, __gnu_pbds::rb_tree_tag, __g
 
 ////////////////////////// Solution starts below. //////////////////////////////
 
-const int N = 7e7, M = 1010;
-
-int t, n, k;
-unordered_map<int, int> ans[10];
-int bt[10][M];
-int pre[N];
-
-void prt(int ax) {
-	if(ax <= 9)
-		cout << ax << '\n';
-	else if(k == 0) {
-		if(ax%9) cout << ax%9;
-		while(ax >= 9) {
-			cout << 9;
+string prt(int ax, int k, int amnt9=0, int seq9=111) {
+	if(ax < 9-(k-amnt9)) {
+		return to_string(ax);
+	} else {
+		vector<char> vec;
+		vec.push_back(9-(k-amnt9)+'0');
+		ax -= 9-(k-amnt9);
+		seq9--;
+		while(ax >= 9 and seq9--) {
+			vec.push_back('9');
 			ax-=9;
 		}
-		cout << '\n';	
-	}
-	else {
-		vector<int> vec;
-		vec.push_back(9-k);
-		ax -= vec.back();
+		if(ax >= 8) {
+			vec.push_back('8');
+			ax-=8;
+		}
 		while(ax >= 9) {
-			vec.push_back(9);
+			vec.push_back('9');
 			ax-=9;
 		}
 		if(ax)
-			vec.push_back(ax);
-		reverse(vec.begin(), vec.end());
-		for(int v : vec)
-			cout << v;
-		cout << '\n';
+			vec.push_back(ax+'0');
+		reverse(ALL(vec));
+		return string(ALL(vec));
 	}
 }
 
-int sumDig(int x) {
-	int ret = 0;
-	while(x) {
-		ret += x%10;
-		x/=10;
-	}
-	return ret;
-}
-
-void brute() {
-	memset(bt, -1, sizeof bt);
-	for(int i = 0; i < N-10; i++) {
-		int acu = pre[i];
-		if(bt[0][acu] == -1) bt[0][acu] = i;
-		for(int j = 1; j <= 9; j++) {
-			acu += pre[i+j];
-			if(bt[j][acu] == -1) bt[j][acu] = i;
+string solve(int n, int k) {
+	if(k == 0)
+		return prt(n, 0);
+	else {
+		int pa = (k*(k+1))/2;
+		if(pa > n) {
+			return "-1";
+		} else if((n-pa)%(k+1) == 0) {
+			int ax = (n-pa)/(k+1);
+			return prt(ax, k);
+		} else {
+			for(int val9 = 9; val9 <= n; val9+=9)
+				for(int amnt9 = 1; amnt9 <= k; amnt9++) {
+					int aux = n - pa + val9*amnt9;
+					if(aux > 0 and aux%(k+1) == 0 and (aux/(k+1)) >= val9-(k-amnt9))
+						return prt(aux/(k+1), k, amnt9, val9/9);
+				}
 		}
 	}
-	for(int i = 0; i < M; i++)
-		for(int j = 0; j <= 9; j++)
-			if(bt[j][i] != -1)
-				ans[j][i] = bt[j][i];
+	return "-1";
 }
 
 int main () {
-	// ios_base::sync_with_stdio(false);
-    // cin.tie(NULL);
-    // cout.precision(10);
-	for(int i = 0; i < N; i++) pre[i] = sumDig(i);
-	brute();
-	for(int i = 1; i <= 150; i++)
-		for(int j = 1; j <= 9; j++) {
-			// cout << "k = " << j << '\n';
-			// for(auto p : ans[j])
-			// 	cout << p.x << ' ' << p.y << '\n';
-			if(ans[j].count(i) == 0) {
-				// cout << "n = " << i << ", k = " << j << '\n';
-			}
-			else {
-				cout << "n = " << i << ", k = " << j << ", val = " << ans[j][i] << '\n';
-			}
-		}
-	// cout << LEN(ans) << '\n';
+	ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+    cout.precision(10);
+
+	int t, n, k;
 	cin >> t;
 	while(t--) {
 		cin >> n >> k;
-		cout << "n = " << n << ", k = " << k << '\t';
-		if(k == 0)
-			prt(n);
-		else if(ans[k].count(n))
-			cout << ans[k][n] << '\n';
-		else {
-			int pa = (k*(k+1))/2;
-			if(pa > n) {
-				cout << "-1\n";
-			} else if((n-pa)%(k+1) == 0) {
-				int ax = (n-pa)/(k+1);
-				prt(ax);
-			} else if(n-pa >= 100) {
-				// cout << "n, pa = " << n << ' ' << pa << '\n';
-				int nn = n-pa;
-				bool ok = false;
-				for(int neg = 1; neg <= k; neg++) {
-					if(nn+neg*9 >= 0 and (nn+neg*9)%(k+1)==0) {
-						// cout << "h = " << (nn+neg*9) << '\n';
-						// cout << "here!\n";
-						vector<int> vec;
-						vec.push_back(9-(neg-1));
-						int ax = (nn+neg*9)/(k+1) - vec.back();
-						vec.push_back(ax%9);
-						while(ax >= 9) {
-							vec.push_back(9);
-							ax-=9;
-						}
-						reverse(vec.begin(), vec.end());
-						for(int v : vec)
-							cout << v;
-						cout << '\n';
-						ok = true;
-					}
-				}
-				if(!ok)
-					cout << "-1\n";
-			} else
-				cout << "-1\n";
-		}
+		cout << solve(n, k) << '\n';
 	}
 
 	return 0;

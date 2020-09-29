@@ -37,3 +37,6 @@
 # Ignores all Makefiles, except from root folder
 *Makefile*
 !/Makefile*
+
+# Ignores .vscode everywhere
+*.vscode*

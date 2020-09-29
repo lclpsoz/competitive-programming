@@ -7,6 +7,16 @@
 
 Templates, makefiles, and out of contests codes that I've coded recently.
 
+
+### ATC/
+
+Folder with contests from AtCoder. Folders name are the 'atc-' concatenated with contest id from AtCoder. Contest can be found at atcoder.jp/contests/id/
+
+**Ex:**
+
+Folder: ATC/atc-abc148
+Found at: atcoder.jp/contests/abc148
+
 ### CF/
 
 Folder with contests from codeforces. The majority of them in the format cf-id, id being the id of the contest. Can be found on www.codeforces.com/contest/id. Some folders are using the round code as name, like 869-r#439(div.2)/
@@ -15,7 +25,7 @@ Folder with contests from codeforces. The majority of them in the format cf-id, 
 
 cf-1095/
 
-Contest found in: www.codeforces.com/contest/1095/
+Contest found at: www.codeforces.com/contest/1095/
 
 ### ARCHIVE/
 

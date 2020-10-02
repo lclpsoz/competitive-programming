@@ -1,116 +1,107 @@
-#include <bits/stdc++.h>
-#include <ext/pb_ds/tree_policy.hpp>
-#include <ext/pb_ds/assoc_container.hpp>
+#include "bits/stdc++.h"
+#include "ext/pb_ds/tree_policy.hpp"
+#include "ext/pb_ds/assoc_container.hpp"
 using namespace std;
-
-#define LEN(x) (int)x.size()
+////////////// Prewritten code follows. Look down for solution. ////////////////
+#define x first
+#define y second
+#define LEN(x) ((int)(x).size())
 #define ALL(x) x.begin(), x.end()
-
 using ll = long long;
+using llu = long long unsigned;
+using ld = long double;
+using pii = pair<int, int>;
 using vi = vector<int>;
-using vvi = vector<vi>;
-using pii = pair<int,int>;
 using vpii = vector<pii>;
+
+const ld EPS = 1e-9;
+inline int cmp(ld x, ld y = 0, ld tol = EPS) {
+	return (x <= y + tol) ? (x + tol < y) ? -1 : 0 : 1;
+}
+
+const int MOD = 1;
+inline int mod(ll x, int m = MOD) {
+	return (int)(((x%   m) + m)%m);
+}
 
 template<typename T, typename M = __gnu_pbds::null_type>
 using ordered_set = __gnu_pbds::tree<T, M, less<T>, __gnu_pbds::rb_tree_tag, __gnu_pbds::tree_order_statistics_node_update>;
 
-template<typename T>
-const T INF = (is_same<T, int>::value ? 1e9 : 1e18);
-const int MOD = 1e9 + 7;
-const double EPS = 1e-9;
+////////////////////////// Solution starts below. //////////////////////////////
 
-inline int fcmp(double x, double y)
-{ return (x < y + EPS ? (x < y - EPS ? -1 : 0) : 1);}
+const int N = 1e5 + 10;
 
-struct range
-{
-    int l, r, color;
-    range(int x = 0, int y = 0, int c = 0) : l(x), r(y), color(c) {}
-    bool operator < (const range& o) const 
-    { return l < o.l; }
-};
- 
-set<range> ranges;
- 
-void add(int l, int r, int color)
-{
-    if(l > r) return;
-    
-    if(empty(ranges))
-    {
-        ranges.insert(range(l, r, color));
-        return;
-    }
-    
-    auto it = ranges.lower_bound(l);
-    
-    if(it != ranges.begin())
-    {
-        --it;
-        if(color == it->color)
-        {
-            l = min(l, it->l);
-            ranges.erase(it);
-        }
-        else if(it->l <= l && it->r >= r)
-        {
-            auto [a, b, c] = *it;
-            ranges.erase(it);
-            ranges.insert(range(a, l - 1, c));
-            ranges.insert(range(l + 1, b, c));
-        }
-    }
- 
-    ranges.insert(range(l, r, color));
-}
+int n;
+int h[N], lef[N], rig[N];
+ll dp[N];
+vpii q, sorted_h;
 
-int main()
-{
-    ios_base::sync_with_stdio(false);
+int main () {
+	ios_base::sync_with_stdio(false);
     cin.tie(NULL);
     cout.precision(10);
-    
-    int n; cin >> n;
-    map<int, vi> mp;
-    vi a(n);
-    for(int i = 0; i < n; i++)
-    {
-        cin >> a[i];
-        mp[-a[i]].emplace_back(i);
+
+    cin >> n;
+    for(int i = 1; i <= n; i++) {
+        cin >> h[i];
+        sorted_h.push_back({h[i], i});
     }
-    vector<ll> dp(n);
+    sort(ALL(sorted_h));
 
-    for(auto& [c, v] : mp)
-    {
-        // cout << "ranges:";
-        // for(auto [l, r, color] : ranges)
-        //     cout << " (" << l << ", " << r << ", " << color << ")";
-        // cout << endl;
-
-        for(int p : v)
-        {
-            dp[p] = 0;
-            auto it = ranges.upper_bound(p);
-            if(it != ranges.begin())
-            {
-                --it;
-                dp[p] = max(dp[p], abs(p - it->l) + dp[it->l]);
-                if(it->r > p)
-                    dp[p] = max(dp[p], abs(p - it->r) + dp[it->r]);
-                else if(++it != ranges.end())
-                    dp[p] = max(dp[p], abs(p - it->r) + dp[it->r]);
-            }
-            else if(it != ranges.end())
-                dp[p] = max(dp[p], abs(p - it->r) + dp[it->r]);
+    // Left
+    for(int i = 1; i <= n; i++) {
+        if(q.empty())
+            q.push_back({h[i], i});
+        else{
+            while(LEN(q) and q.back().x < h[i])
+                q.pop_back();
+            if(LEN(q) and (q.back().x != h[i]))
+                lef[i] = q.back().y;
+            else if(LEN(q) > 1)
+                lef[i] = q[LEN(q)-2].y;
+            if(q.empty() or q.back().x > h[i])
+                q.push_back({h[i], i});
         }
-
-        for(int p : v)
-            add(p, p, -c);
     }
 
-    for(int i = 0; i < n; i++)
-        cout << dp[i] << " \n"[i == n - 1];
+    q.clear();
+    // Right
+    for(int i = n; i >= 1; i--) {
+        if(q.empty())
+            q.push_back({h[i], i});
+        else{
+            while(LEN(q) and q.back().x < h[i])
+                q.pop_back();
+            if(LEN(q) and (q.back().x != h[i]))
+                rig[i] = q.back().y;
+            else if(LEN(q) > 1)
+                rig[i] = q[LEN(q)-2].y;
+            if(q.empty() or q.back().x > h[i])
+                q.push_back({h[i], i});
+        }
+    }
 
-    return 0;
+    // cout << "Left:\n";
+    // for(int i = 1; i <= n; i++)
+    //     cout << lef[i] << " \n"[i==n];
+    // cout << "Right:\n";
+    // for(int i = 1; i <= n; i++)
+    //     cout << rig[i] << " \n"[i==n];
+
+    while(LEN(sorted_h)) {
+        int pos = sorted_h.back().y;
+        sorted_h.pop_back();
+        ll vl = dp[lef[pos]];
+        if(lef[pos])
+            vl += pos-lef[pos];
+
+        ll vr = dp[rig[pos]];
+        if(rig[pos])
+            vr += rig[pos]-pos;
+        dp[pos] = max(vl, vr);
+    }
+    for(int i = 1; i <= n; i++)
+        cout << dp[i] << " \n"[i==n];
+
+	return 0;
 }

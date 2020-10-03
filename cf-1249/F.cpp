@@ -36,50 +36,53 @@ int w[N];
 vector<int> adj[N];
 int dp[N][N];
 
-int solve(int v, int p, int dist) {
-	// printf("%d %d\n", v, dep);
-	int &ret = dp[v][dist];
-	if(ret != -1) return ret;
-	int sum = 0;
-	if(dist > k) {
-		sum = w[v];
+void solve(int v, int p) {
+	for(int u : adj[v])
+		if(u != p)
+			solve(u, v);
+
+	// General
+	for(int i = k-1; i >= 1; i--) {
+		int &now = dp[v][i];
+		int total = 0;
 		for(int u : adj[v])
 			if(u != p)
-				sum += solve(u, v, 1);
+				total += dp[u][max(i-1, k-i-1)];
+		for(int u : adj[v])
+			if(u != p)
+				now = max(now, total - dp[u][max(i-1, k-i-1)] + dp[u][i-1]);
+
+		now = max(now, dp[v][i+1]);
 	}
-	int sum2 = 0;
-	for(int u : adj[v]) {
+
+	// Using v
+	int &ax = dp[v][0];
+	ax = w[v];
+	for(int u : adj[v])
 		if(u != p)
-			sum2 += solve(u, v, dep+1);
-	}
-	// printf("  v = %d, %d %d\n", v, sum, sum2);
-	ret = max(sum, sum2);
-	return ret;
+			ax += dp[u][k-1];
+	ax = max(ax, dp[v][1]);
 }
 
 int main () {
-	// ios_base::sync_with_stdio(false);
-    // cin.tie(NULL);
-    // cout.precision(10);
-	scanf("%d %d", &n, &k);
-	for(int i = 1; i <= n; i++)
-		scanf("%d", &w[i]);
+	ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+    cout.precision(10);
+
+	cin >> n >> k;
+	++k;
+	for(int i = 1; i <= n; i++) cin >> w[i];
 
 	for(int i = 0; i < n-1; i++) {
-		int x, y;
-		scanf("%d %d", &x, &y);
-		adj[x].push_back(y);
-		adj[y].push_back(x);
+		int u, v;
+		cin >> u >> v;
+		adj[u].push_back(v);
+		adj[v].push_back(u);
 	}
 
-	int ans = 0;
-	for(int root = 1; root <= n; root++) {
-		memset(dp, -1, sizeof dp);
-		int now = solve(root, -1, k+1);
-		printf("root = %d, val = %d\n", root, now);
-		ans = max(ans, now);
-	}
-	printf("%d\n", ans);
+	solve(1, 1);
+	cout << dp[1][0] << '\n';
+
 
 	return 0;
 }

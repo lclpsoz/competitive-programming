@@ -29,9 +29,10 @@ using ordered_set = __gnu_pbds::tree<T, M, less<T>, __gnu_pbds::rb_tree_tag, __g
 
 ////////////////////////// Solution starts below. //////////////////////////////
 
-//const int N = 1e5 + 10;
+const int N = 1e5 + 10;
 
-//int dp[N][N];
+string a, b;
+int dp[2][N];
 
 
 
@@ -40,9 +41,37 @@ int main () {
     cin.tie(NULL);
     cout.precision(10);
 
-    for (int i = 1; i <= 1e5; i++) {
-    	cout << i << " " << 0.99 * (double)i << endl;
-    }
+	cin >> a >> b;
+	int n = LEN(a);
+	int miss = n/100;
+
+	for(int i = 0; i <= n; i++) {
+		int now = i%2;
+		int bef = !now;
+		for(int j = max(0, i-miss); j <= min(n, i+miss); j++) {
+			// cout << "i = " << i << ", j = " << j << '\n';
+			int &val = dp[now][j];
+			val = 0;
+			if(i and j and a[i-1] == b[j-1])
+				val = dp[bef][j-1]+1;
+			if(j)
+				val = max(val, dp[now][j-1]);
+			val = max(val, dp[bef][j]);
+		}
+		// cout << "  dp[" << i << "] = ";
+		// for(int j = max(0, n-10); j <= n; j++)
+		// 	cout << dp[now][j] << " \n"[j==n];
+	}
+	// for(int i = 0; i < 2; i++) {
+	// 	cout << "  dp[" << i << "] = ";
+	// 	for(int j = max(0, n-10); j <= n; j++)
+	// 		cout << dp[i][j] << " \n"[j==n];
+	// }
+	// cout << dp[n%2][n] << '\n';
+	if(n-dp[(n)%2][n] > miss)
+		cout << "Not brothers :(\n";
+	else
+		cout << "Long lost brothers D:\n";
 
 	return 0;
 }

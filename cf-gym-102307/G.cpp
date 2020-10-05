@@ -32,56 +32,71 @@ using ordered_set = __gnu_pbds::tree<T, M, less<T>, __gnu_pbds::rb_tree_tag, __g
 const int N = 1e4 + 10;
 
 int n, k;
-int adj[N];
-int pre[N];
-int maxi_prof[N];
-set<pair<int, pii>> st;
+int nxt[N];
+// vector<int> bef[N];
+int qnt_pre[N];
+bitset<N> vis;
+int path_len[N];
+vector<int> top_sort;
+
+int dfs_path(int v) {
+	if(path_len[v])
+		return path_len[v];
+	if(nxt[v])
+		return path_len[v] = dfs_path(nxt[v]) + 1;
+	else
+		return path_len[v] = 1;
+}
+
+void dfs_top_sort(int v) {
+	if(vis[v]) return;
+	vis[v] = 1;
+	if(nxt[v])
+		dfs_top_sort(nxt[v]);
+	top_sort.push_back(v);
+}
 
 int main () {
-	// ios_base::sync_with_stdio(false);
-    // cin.tie(NULL);
-    // cout.precision(10);
+	ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+    cout.precision(10);
 
 	cin >> n >> k;
-	for(int i = 1; i<=n; i++) {
-		int v;
-		cin >> v;
-		adj[i] = v;
-		pre[v]++;
+	for(int v = 1; v <= n; v++) {
+		int u;
+		cin >> u;
+		nxt[v] = u;
+		qnt_pre[u]++;
+		// bef[u].push_back(v);
 	}
+	for(int v = 1; v <= n; v++)
+		if(!vis[v])
+			dfs_top_sort(v);
+	reverse(ALL(top_sort));
 
-	queue<pii> q;
-	for(int i = 1; i <= n; i++)
-		if(!pre[i])
-			q.push({i, 1});
-	
-	while(!q.empty()) {
-		// cout << LEN(q) << '\n';
-		int v = q.back().x;
-		int pf = q.back().y;
-		q.pop();
-		
-		if(maxi_prof[v] == 0)
-			maxi_prof[v] = pf;
-		if(adj[v])
-			q.push({adj[v], pf+1});
-	}
-	for(int i = 1; i <= n; i++)
-		st.insert({pre[i], {maxi_prof[i], i}});
+	for(int v : top_sort)
+		if(!path_len[v])
+			dfs_path(v);
+
+	set<pair<int, pii>> st;
+	for(int v = 1; v <= n; v++)
+		st.insert({qnt_pre[v], {-path_len[v], v}});
 
 	map<int, int> mp;
 	for(int ans = 1;; ans++) {
 		
+		// cout << "  i = " << ans << '\n';
 		for(int i = 0; LEN(st) and st.begin()->x == 0 and i < k; i++) {
 			int v = st.begin()->y.y;
+			// cout << "    v = " << v << ", maxi = " << st.begin()->y.x << '\n';
 			st.erase(st.begin());
-			int u = adj[v];
+			int u = nxt[v];
 			if(u == 0) continue;
 			if(mp.count(u))
 				mp[u]++;
 			else
 				mp[u] = 1;
-			pre[u]--;
+			qnt_pre[u]--;
 		}
 		if(LEN(st) == 0) {
 			cout << ans << '\n';
@@ -89,8 +104,8 @@ int main () {
 		}
 		for(auto p : mp) {
 			int v = p.x;
-			st.erase({pre[p.x]+p.y, {maxi_prof[v], v}});
-			st.insert({pre[v], {maxi_prof[v], v}});
+			st.erase({qnt_pre[p.x]+p.y, {-path_len[v], v}});
+			st.insert({qnt_pre[v], {-path_len[v], v}});
 		}
 		mp.clear();
 	}

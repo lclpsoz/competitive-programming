@@ -62,7 +62,7 @@ int main () {
 			vis[p]++;
 		}
 	}
-	for(int i = 2; i <= n; i++)
+	for(int i = 2; i < N; i++)
 		if(vis[i] == n) {
 			cout << "not coprime\n";
 			exit(0);

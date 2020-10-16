@@ -37,17 +37,23 @@ ll mat[26][26];
 void solve(ll val, vpii path_ans = {}) {
 	vpii path;
 	ll lst = 2;
-	bool inv = false;
 	pii pos = {1, 1};
+	int p = 0;
+	int down = 0;
 	for(int i = 0; i < 2*(n-1); i++) {
 		path.push_back(pos);
-		// if(DBG)
-		// 	cout << i << ": " << inv << '\n';
 		if(pos.x == n) pos.y++;
 		else if(pos.y == n) pos.x++;
 		else {
-			if(mat[pos.x+1][pos.y]&val) pos.x++;
-			else pos.y++;
+			int eval = (val&(1LL<<p)) > 0;
+			// if(DBG)
+			// 	cout << i << ": eval = " << eval << ", down = " << down << '\n';
+			if(eval == down) pos.x++;
+			else {
+				pos.y++;
+				down = !down;
+			}
+			p++;
 		}
 	}
 	path.push_back({n, n});
@@ -61,8 +67,13 @@ void solve(ll val, vpii path_ans = {}) {
 		// for(pii coord : path)
 		// 	cout << coord.x << ' ' << coord.y << '\n';
 		cout.flush();
-		for(int i = 0; i < LEN(path); i++)
+		for(int i = 0; i < LEN(path); i++) {
+			// if(path[i] != path_ans[i]) {
+			// 	cout << path[i].x << ", " << path[i].y << " vs " << path_ans[i].x << ", " << path_ans[i].y << '\n';
+			// 	cout.flush();
+			// }
 			assert(path[i] == path_ans[i]);
+		}
 	}
 }
 
@@ -83,16 +94,20 @@ int main () {
 	});
 
 	int bef = -1;
-	int lst = -2;
+	int lst = -1;
+
 	for(int i = 1; i < LEN(all_pairs)-1; i++) {
 		auto [x, y] = all_pairs[i];
 		if(bef != (x+y)) {
-			lst+=2;
+			lst++;
 			bef = x+y;
 		}
 		int ax = y&1;
-		if(x+y > n+1 and (x+y)%2 != n%2) ax=(!ax);
-		mat[x][y] = 1LL<<(lst + ax);
+		// if(x+y > n+1 and (x+y)%2 == n%2) ax=(!ax);
+		if(ax)
+			mat[x][y] = 0;
+		else
+			mat[x][y] = 1LL<<lst;
 	}
 	if(DBG)
 		cout << "lst = " << lst << '\n';
@@ -114,7 +129,22 @@ int main () {
 		}
 	} else {
 		vector<vpii> paths;
-		for(ll i = 0; LEN(paths) < 1e5 and i < (1LL<<((n-1)*2)); i++) {
+		for(ll i = 0; LEN(paths) < 5e6 and i < (1LL<<((n-1)*2)); i++) {
+			if(__builtin_popcountll(i) == n-1) {
+				vpii path;
+				pii now = {1, 1};
+				for(int j = 0; j < 2*(n-1); j++) {
+					path.push_back(now);
+					if(i&(1LL<<j))
+						now.x++;
+					else
+						now.y++;
+				}
+				path.push_back(now);
+				paths.push_back(path);
+			}
+		}
+		for(ll i = (1LL<<((n-1)*2))-1; LEN(paths) < 1e7 and i; i--) {
 			if(__builtin_popcountll(i) == n-1) {
 				vpii path;
 				pii now = {1, 1};
@@ -133,11 +163,12 @@ int main () {
 		q = LEN(paths);
 		while(q--) {
 			ll val = 0;
+			// cout << "CORRECT:\n";
 			for(pii coord : paths[q]) {
 				// cout << coord.x << ' ' << coord.y << '\n';
 				val += mat[coord.x][coord.y];
 			}
-			cout << val << '\n';
+			// cout << "val = " << val << '\n';
 			cout.flush();
 			solve(val, paths[q]);
 		}

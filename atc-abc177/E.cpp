@@ -32,22 +32,24 @@ using ordered_set = __gnu_pbds::tree<T, M, less<T>, __gnu_pbds::rb_tree_tag, __g
 const int N = 1e6 + 10;
 
 bitset<N> not_prime;
-vector<int> div_primes[N];
+int min_div_prime[N];
 
 int main () {
 	ios_base::sync_with_stdio(false);
     cin.tie(NULL);
     cout.precision(10);
 
-	// int cnt = 0;
-	for(int i = 2; i < N; i++)
+	for(int i = 2; i*i < N; i++)
 		if(!not_prime[i])
-			for(int j = i; j < N; j+=i) {
+			for(int j = i*i; j < N; j+=i) {
 				not_prime[j] = 1;
-				div_primes[j].push_back(i);
-				// cnt++;
+				if(!min_div_prime[j])
+					min_div_prime[j] = i;
 			}
-	// cout << cnt << '\n';
+	for(int i = 2; i < N; i++)
+		if(!not_prime[i] and !min_div_prime[i])
+			min_div_prime[i] = i;
+
 	
 	int n;
 	cin >> n;
@@ -56,7 +58,9 @@ int main () {
 	for(int i = 0; i < n; i++) {
 		int x;
 		cin >> x;
-		for(int p : div_primes[x]) {
+		while(x > 1) {
+			int p = min_div_prime[x];
+			while(x%p == 0) x/=p;
 			if(vis[p])
 				ans = "setwise coprime";
 			vis[p]++;

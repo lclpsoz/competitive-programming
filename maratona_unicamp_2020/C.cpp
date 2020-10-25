@@ -19,7 +19,7 @@ inline int cmp(ld x, ld y = 0, ld tol = EPS) {
 	return (x <= y + tol) ? (x + tol < y) ? -1 : 0 : 1;
 }
 
-const int MOD = 1;
+const int MOD = 1e9+7;
 inline int mod(ll x, int m = MOD) {
 	return (int)(((x%m) + m)%m);
 }
@@ -29,31 +29,55 @@ using ordered_set = __gnu_pbds::tree<T, M, less<T>, __gnu_pbds::rb_tree_tag, __g
 
 ////////////////////////// Solution starts below. //////////////////////////////
 
-const int T = 2e6 + 10, A = 31;
+const int N = 1e5 + 10;
 
-int trie[T][A];
-int lst_p_used = 1;
-
-void add(string &s, int p_s, int p_trie, int val) {
-	// cout << "s = " << s << ", p_s = " << p_s << ", p_trie = " << p_trie << '\n';
-	int *trie_now = trie[p_trie];
-	if(p_s == LEN(s))
-		trie_now[A-1] = max(val, trie_now[A-1]);
-	else {
-		assert(s[p_s] <= 'Z' and s[p_s] >= 'A' and s[p_s] != 'X');
-		if(!trie_now[s[p_s]-'A'])
-			trie_now[s[p_s]-'A'] = ++lst_p_used;
-		add(s, p_s+1, trie_now[s[p_s]-'A'], val);
+int pow_mod(int b, int p, int m) {
+	int ret = 1;
+	while(p) {
+		if(p&1) ret = (ret *1LL* b)%m;
+		p >>= 1;
+		b = (b*1LL*b)%m;
 	}
+	return ret;
 }
 
-int qry(string &s, int p_s, int p_trie) {
-	// cout << "qry: s = " << s << ", p_s = " << p_s << '\n';
-	if(!p_trie) return 0;
-	int *trie_now = trie[p_trie];
-	if(p_s == LEN(s)) return trie_now[A-1];
-	return max(trie_now[A-1], qry(s, p_s+1, trie_now[s[p_s]-'A']));
+int inv_mod(int v, int m) {
+	return pow_mod(v, m-2, m);
 }
+
+struct hash_struct {
+	int n, base, m;
+	vi vals, inv_mods;
+	hash_struct(int _base, string &s, int _m) {
+		base = _base;
+		n = LEN(s);
+		m = _m;
+		int pw = 1;
+		inv_mods = vi(n+1);
+		for(int i = 0; i < n; i++) {
+			if(LEN(vals))
+				vals.push_back(vals.back());
+			else
+				vals.push_back(0);
+			vals.back() = (vals.back()+(pw*1LL*s[i]))%m;
+			pw = (pw*1LL*base)%m;
+		}
+		inv_mods[n] = inv_mod(pw, m);
+		for(int i = n-1; i >= 1; i--)
+			inv_mods[i] = (inv_mods[i+1]*1LL*base)%m;
+	}
+
+	int get_hash(int l, int r) {
+		int ret = vals[r];
+		if(l) {
+			ret = (ret-vals[l-1]+m)%m;
+			ret = (ret * 1LL * inv_mods[l])%m;
+		}
+		return ret;
+	}
+
+};
+
 
 int main () {
 	ios_base::sync_with_stdio(false);
@@ -64,30 +88,60 @@ int main () {
 	string s;
 
 	cin >> n >> min_d;
+	vector<pair<pii, int>> words;
+	bitset<N> words_sizes_msk;
+	int base_1 = 999999937, base_2 = 999999797;
 	for(int i = 0; i < n; i++) {
 		int d;
 		cin >> s >> d;
-		reverse(ALL(s));
-		s = s.substr(1);
-		add(s, 0, 1, d);
+		words_sizes_msk[LEN(s)-1] = 1;
+		pii hash_now = {0, 0};
+		pii base_now = {1, 1};
+		for(int i = 0; i < LEN(s)-1; i++) {
+			hash_now.x = (hash_now.x+s[i]*1LL*base_now.x)%MOD;
+			hash_now.y = (hash_now.y+s[i]*1LL*base_now.y)%MOD;
+			base_now.x = (base_now.x*1LL*base_1)%MOD;
+			base_now.y = (base_now.y*1LL*base_2)%MOD;
+		}
+		words.push_back({hash_now, d});
 	}
+	vi words_sizes;
+	for(int i = 0; i < N; i++)
+		if(words_sizes_msk[i])
+			words_sizes.push_back(i);
+
+	sort(ALL(words));
 
 	int ans = 0;
 	cin >> s;
 	int st = 0;
-	if(s[st] == 'X') ans = min_d;
-	for(int i = 1; i < LEN(s); i++)
+	hash_struct hash_s1 = hash_struct(999999937, s, MOD);
+	hash_struct hash_s2 = hash_struct(999999797, s, MOD);
+	cout.flush();
+	for(int i = 0; i < LEN(s); i++)
 		if(s[i] == 'X') {
-			if(st == i-1) {
+			cout.flush();
+			if(st >= i-1) {
 				st = i;
 				ans+=min_d;
 			} else {
-				if(s[st] == 'X') ++st;
-				string s_now = s.substr(st, i-st);
-				reverse(ALL(s_now));
-				ans += max(min_d, qry(s_now, 0, 1));
-				// ans += qry(s_now, 0, 1);
-				st = i;
+				int en = i-1;
+				int sz = i-st;
+				int now = min_d;
+				for(int w_sz : words_sizes) {
+					if(w_sz <= sz) {
+						pii hash_now = {
+							hash_s1.get_hash(i-w_sz, i-1),
+							hash_s2.get_hash(i-w_sz, i-1)
+						};
+						auto it = lower_bound(ALL(words), make_pair(hash_now, 0));
+						if(it != words.end() and it->x == hash_now)
+							now = max(now, it->y);
+					}
+					else
+						break;
+				}
+				ans += now;
 			}
 		}
 	cout << ans << '\n';

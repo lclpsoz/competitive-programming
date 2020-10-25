@@ -29,10 +29,10 @@ using ordered_set = __gnu_pbds::tree<T, M, less<T>, __gnu_pbds::rb_tree_tag, __g
 
 ////////////////////////// Solution starts below. //////////////////////////////
 
-const int T = 2e6 + 10, A = 31;
+const int T = 1e6, A = 31;
 
 int trie[T][A];
-int lst_p_used = 1;
+int pos_used_trie = 1;
 
 void add(string &s, int p_s, int p_trie, int val) {
 	// cout << "s = " << s << ", p_s = " << p_s << ", p_trie = " << p_trie << '\n';
@@ -40,19 +40,18 @@ void add(string &s, int p_s, int p_trie, int val) {
 	if(p_s == LEN(s))
 		trie_now[A-1] = max(val, trie_now[A-1]);
 	else {
-		assert(s[p_s] <= 'Z' and s[p_s] >= 'A' and s[p_s] != 'X');
 		if(!trie_now[s[p_s]-'A'])
-			trie_now[s[p_s]-'A'] = ++lst_p_used;
+			trie_now[s[p_s]-'A'] = ++pos_used_trie;
 		add(s, p_s+1, trie_now[s[p_s]-'A'], val);
 	}
 }
 
-int qry(string &s, int p_s, int p_trie) {
+int get_trie(string &s, int p_s, int p_trie) {
 	// cout << "qry: s = " << s << ", p_s = " << p_s << '\n';
 	if(!p_trie) return 0;
 	int *trie_now = trie[p_trie];
 	if(p_s == LEN(s)) return trie_now[A-1];
-	return max(trie_now[A-1], qry(s, p_s+1, trie_now[s[p_s]-'A']));
+	return max(trie_now[A-1], get_trie(s, p_s+1, trie_now[s[p_s]-'A']));
 }
 
 int main () {
@@ -60,10 +59,9 @@ int main () {
     cin.tie(NULL);
     cout.precision(10);
 
-	int n, min_d;
+	int n, d_min;
 	string s;
-
-	cin >> n >> min_d;
+	cin >> n >> d_min;
 	for(int i = 0; i < n; i++) {
 		int d;
 		cin >> s >> d;
@@ -72,25 +70,29 @@ int main () {
 		add(s, 0, 1, d);
 	}
 
-	int ans = 0;
 	cin >> s;
-	int st = 0;
-	if(s[st] == 'X') ans = min_d;
-	for(int i = 1; i < LEN(s); i++)
-		if(s[i] == 'X') {
-			if(st == i-1) {
-				st = i;
-				ans+=min_d;
+	int l = 0;
+	int ans = 0;
+	if(s[l] == 'X') ans = d_min;
+	// cout << "S = " << s << '\n';
+	for(int r = 1; r < LEN(s); r++) 
+		if(s[r] == 'X') {
+			// cout << " r = " << r << '\n';
+			if(r == l+1) {
+				ans += d_min;
+				l = r;
 			} else {
-				if(s[st] == 'X') ++st;
-				string s_now = s.substr(st, i-st);
+				// cout << " l = " << l << ", r = " << r << '\n';
+				if(s[l] == 'X') ++l;
+				string s_now = s.substr(l, r-l);
 				reverse(ALL(s_now));
-				ans += max(min_d, qry(s_now, 0, 1));
-				// ans += qry(s_now, 0, 1);
-				st = i;
+				ans += max(d_min, get_trie(s_now, 0, 1));
+				// cout << "get = " << get_trie(s_now, 0, 0) << '\n';
+				l = r;
 			}
 		}
 	cout << ans << '\n';
+	
 
 	return 0;
 }

@@ -29,68 +29,80 @@ using ordered_set = __gnu_pbds::tree<T, M, less<T>, __gnu_pbds::rb_tree_tag, __g
 
 ////////////////////////// Solution starts below. //////////////////////////////
 
-const int T = 2e6 + 10, A = 31;
+const int A = 30;
 
-int trie[T][A];
-int lst_p_used = 1;
-
-void add(string &s, int p_s, int p_trie, int val) {
-	// cout << "s = " << s << ", p_s = " << p_s << ", p_trie = " << p_trie << '\n';
-	int *trie_now = trie[p_trie];
-	if(p_s == LEN(s))
-		trie_now[A-1] = max(val, trie_now[A-1]);
-	else {
-		assert(s[p_s] <= 'Z' and s[p_s] >= 'A' and s[p_s] != 'X');
-		if(!trie_now[s[p_s]-'A'])
-			trie_now[s[p_s]-'A'] = ++lst_p_used;
-		add(s, p_s+1, trie_now[s[p_s]-'A'], val);
+struct node {
+	node *nxt[A];
+	int val;
+	node() {
+		for(int i = 0; i < A; i++)
+			nxt[i] = NULL;
+		val = 0;
 	}
-}
 
-int qry(string &s, int p_s, int p_trie) {
-	// cout << "qry: s = " << s << ", p_s = " << p_s << '\n';
-	if(!p_trie) return 0;
-	int *trie_now = trie[p_trie];
-	if(p_s == LEN(s)) return trie_now[A-1];
-	return max(trie_now[A-1], qry(s, p_s+1, trie_now[s[p_s]-'A']));
-}
+	node *get(char c) {
+		return nxt[c-'A'];
+	}
+
+	node set(char c, node *_node) {
+		nxt[c-'A'] = _node;
+	}
+};
 
 int main () {
 	ios_base::sync_with_stdio(false);
     cin.tie(NULL);
     cout.precision(10);
 
-	int n, min_d;
+	int n, d_min;
 	string s;
+	cin >> n >> d_min;
 
-	cin >> n >> min_d;
+	node root = node();
 	for(int i = 0; i < n; i++) {
 		int d;
 		cin >> s >> d;
 		reverse(ALL(s));
 		s = s.substr(1);
-		add(s, 0, 1, d);
+		node *cur = &root;
+		cout.flush();
+		for(char c : s) {
+			cout.flush();
+			if(cur->get(c) == NULL) {
+				cout.flush();
+				cur->set(c, new node());
+			}
+			cur = cur->get(c);
+		}
+		cur->val = d;
 	}
 
-	int ans = 0;
 	cin >> s;
-	int st = 0;
-	if(s[st] == 'X') ans = min_d;
-	for(int i = 1; i < LEN(s); i++)
-		if(s[i] == 'X') {
-			if(st == i-1) {
-				st = i;
-				ans+=min_d;
-			} else {
-				if(s[st] == 'X') ++st;
-				string s_now = s.substr(st, i-st);
+	int l = 0;
+	int ans = 0;
+	for(int r = 0; r <= LEN(s); r++)
+		if(s[r] == 'X')
+			if(r == l) {
+				ans += d_min;
+				l = r+1;
+			} else { 
+				cout.flush();
+				string s_now = s.substr(l, r-l);
 				reverse(ALL(s_now));
-				ans += max(min_d, qry(s_now, 0, 1));
-				// ans += qry(s_now, 0, 1);
-				st = i;
+				node *cur = &root;
+				int now = d_min;
+				for(char c : s_now) {
+					if(cur->get(c)) {
+						cur = cur->get(c);
+						now = max(now, cur->val);
+					} else
+						break;
+				}
+				ans += now;
+				l = r+1;
 			}
-		}
 	cout << ans << '\n';
+
 
 	return 0;
 }

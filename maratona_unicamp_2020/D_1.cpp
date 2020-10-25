@@ -30,18 +30,17 @@ using ordered_set = __gnu_pbds::tree<T, M, less<T>, __gnu_pbds::rb_tree_tag, __g
 ////////////////////////// Solution starts below. //////////////////////////////
 
 int n, m;
-int vals[105];
-int range[105][105];
-int dp[105][105][105];
+vi vals;
+map<int, int> mp[105][105];
 
-int solve(int p, int lst, int used) {
-	if(p > n)
-		return range[lst+1][n];
-	int &ret = dp[p][lst][used];
-	if(ret != -1) return ret;
-	ret = solve(p+1, lst, used);
+int solve(int p, int used, int acu) {
+	if(p == n) return 0;
+	if(mp[p][used].count(acu)) return mp[p][used][acu];
+	int &ret = mp[p][used][acu];
+	acu += vals[p];
+	ret = solve(p+1, used, acu) + acu;
 	if(used < m)
-		ret = min(ret, solve(p+1, p, used+1) + range[lst+1][p-1]);
+		ret = min(ret, solve(p+1, used+1, 0));
 	return ret;
 }
 
@@ -50,19 +49,15 @@ int main () {
     cin.tie(NULL);
     cout.precision(10);
 
-	memset(dp, -1, sizeof dp);
-
 	cin >> n >> m;
-	for(int i = 1; i <= n; i++) {
-		cin >> vals[i];
-		for(int j = 1; j <= i; j++)
-			range[j][i] = range[j][i-1]+vals[i];
+	assert(n <= 100 and m <= 100);
+	for(int i = 0; i < n; i++) {
+		int x;
+		cin >> x;
+		vals.push_back(x);
 	}
-	for(int i = 1; i <= n; i++)
-		for(int j = 1; j <= i; j++)
-			range[j][i] += range[j][i-1];
 
-	cout << solve(1, 0, 0) << '\n';
+	cout << solve(0, 0, 0) << '\n';
 
 	return 0;
 }

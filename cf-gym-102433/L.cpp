@@ -47,129 +47,81 @@ string brute(int a) {
 	return ret;
 }
 
-void test() {
-	vi amnt(10);
-	for(int i = 0; i <= 9; i++)
-		for(int j = 0; j <= 9; j++)
-			amnt[(i*j)%10]++;
-	cout << "All pairs:\n";
-	for(int i = 0; i <= 9; i++)
-		cout << i << ": " << amnt[i] << '\n';
-	amnt = vi(10);
-	cout << "Squares:\n";
-	for(int i = 0; i <= 9; i++) {
-			amnt[(i*i)%10]++;
-			cout << i << ": " << (i*i)%10 << '\n';
-	}
-	cout << "\n_\n";
-	for(int i = 0; i <= 9; i++)
-		cout << i << ": " << amnt[i] << '\n';
-
-	cout << "All pairs with *2:\n";
-	amnt = vi(10);
-	for(int i = 0; i <= 9; i++)
-		for(int j = 0; j <= 9; j++)
-			amnt[(2*i*j)%10]++;
-	for(int i = 0; i <= 9; i++)
-		cout << i << ": " << amnt[i] << '\n';
-
-	cout << "All pairs i%2 == 0 with *2:\n";
-	amnt = vi(10);
-	for(int i = 0; i <= 8; i+=2)
-		for(int j = 0; j <= 9; j++)
-			amnt[(2*i*j)%10]++;
-	for(int i = 0; i <= 9; i++)
-		cout << i << ": " << amnt[i] << '\n';
-}
-
-vi ans(100, 1001);
-
 vi _solve(string &inp, vi n, int sz, int p) {
-	bool ok = false;
-	int st = 0;
-    vi bst = vi(LEN(n), 1010);
-	if(p >= sz)
-		st += p-sz+1;
+	int st = max(0, p-sz+1);
 	int lst = min(p, sz-1);
-	// cout << "st, lst = " << st << ", " << lst << '\n';
+	// for(int i = 0; i < 2*p; i++) cout << '|';
+	// cout << "p = " << p << ", st = " << st << ", lst = " << lst << ", sz = " << sz << '\n';
+	cout.flush();
 	if(p == LEN(inp))
-        return n;
+		return n;
 	else if(p >= sz) {
 		int sum = 0;
-		for(int i = st; i <= lst; i++)
-			sum = (sum+(n[i]*n[p-i])%10)%10;
-		cout << "      p = " << p << ", sum = " << sum << '\n';
+		for(int i = st; i <= lst; i++) {
+			// cout << "---->>>> " << i << " " << p-i << '\n';
+			sum = (sum + (n[i]*n[p-i])%10)%10;
+		}
+		// for(int i = 0; i < 2*p; i++) cout << '|';
+		// cout << "    sum = " << sum << ", inp[p] = " << (char)('0'+inp[p]) << '\n';
 		if(sum == inp[p] and LEN(_solve(inp, n, sz, p+1)))
 			return n;
-        else
-            return {};
-	} else {
-		int sum = 0;
-		for(int i = st+1; i < lst; i++) {
-			// cout << "|" << i << ", " << p-i << '\n';
-			sum = (sum+(n[i]*n[p-i])%10)%10;
-		}
-		// cout << "p = " << p << ", st, lst = " << st << ", " << lst << '\n';
-		// cout << "sum = " << sum << '\n';
-		for(int i = p==sz-1; i <= 9; i++) {
-			n[p] = i;
-			bool verif = (((1+(p>0))*n[st]*n[lst])%10 + sum)%10==inp[p];
-            // cout << "  p = "<<p<<", i = " << i << '\n';
-			if(verif) {
-                vi ret = _solve(inp, n, sz, p+1);
-                if(LEN(ret)) {
-				    cout << "    p = " << p << ", inp[p] = " << (char)(inp[p]+'0') << ", i = " << i << '\n';
-                    // cout << "    VALID!\n";
-                    for(int j = sz-1; j >= p; j--)
-                        if(ret[j] < bst[j]) {
-                            bst = ret;
-                            break;
-                        } else if(ret[j] > bst[j])
-                            break;
-                    ok = true;
-                }
-            }
-		}
+		else
+			return {};
 	}
-    if(!ok)
-        return {};
-    else
-	    return bst;
+	else {
+		vi bst = {};
+		for(n[p] = p == sz-1; n[p] <= 9; n[p]++) {
+			int sum = 0;
+			for(int i = st; i <= lst; i++)
+				sum = (sum + (n[i]*n[p-i])%10)%10;
+
+			// for(int i = 0; i < 2*p; i++) cout << '|';
+			// cout << "  n[" << p << "] = " << n[p] << ", sum = " << sum << ", inp[p] = " << (char)(inp[p]+'0') << '\n';
+			cout.flush();
+			if(sum == inp[p]) {
+				vi ret = _solve(inp, n, sz, p+1);
+				if(LEN(ret)) {
+					if(LEN(bst) == 0) bst = ret;
+					else
+						for(int i = sz-1; i > p; i--)
+							if(ret[i] < bst[i]) {
+								bst = ret;
+								break;
+							} else if(ret[i] > bst[i])
+								break;
+					// for(int i = sz-1; i >= 0; i--)
+					// 	cout << bst[i] << " \n"[i==0];
+				}
+			}
+		}
+		// cout << "    LEN(bst) = " << LEN(bst) << '\n';
+		cout.flush();
+		return bst;
+	}
 }
 
 string solve(string inp) {
 	vi n(50, 1001);
-	ans = vi(50, 1000);
-	if(inp == "0") return "0";
-	for(char &c : inp) c -= '0';
+	if(inp == "0")
+		return "0";
+	for(char &c : inp)
+		c -= '0';
 	int sz = (LEN(inp)/2)+1;
 	reverse(ALL(inp));
     n = _solve(inp, n, sz, 0);
 	if(LEN(n) == 0)
 		return "-1";
 
-	// for(int i = 0; i < sz; i++)
-	// 	cout << n[i];
-
-	// ans = n;
 	string ret = "";
 	for(int i = sz-1; i >= 0; i--)
-		ret +=  n[i]+'0';
-	// cout << '\n';
+		ret += n[i]+'0';
+
 	return ret;
 }
 
-int main () {
-	ios_base::sync_with_stdio(false);
-    cin.tie(NULL);
-    cout.precision(10);
-
-	// cout << brute(123) << '\n';
-	// test();
-	// solve();
-	// cin >> inp;
+void test_solve() {
 	map<string, int> mp;
-	for(int i = 0; i < 1000; i++) {
+	for(int i = 0; i < 10000; i++) {
 		string s = brute(i);
 		if(mp.count(s) == 0) {
 			mp[s] = i;
@@ -180,19 +132,18 @@ int main () {
 			}
 		}
 	}
-	// for(int i = 0; i < 1000; i++) {
-	// 	cout << "i = " << i << '\n';
-	// 	string s = brute(i);
-	// 	cout << "  s = " << s << '\n';
-	// 	cout << "  solve = " << solve(s) << '\n';
-	// 	cout.flush();
-	// 	if(solve(s) != to_string(i)) {
-	// 		cout << solve(s) << '\n';
-	// 		cout << "here!\n";
-	// 		cout.flush();
-	// 		exit(0);
-	// 	}
-	// }
+}
+
+int main () {
+	ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+    cout.precision(10);
+
+	// test_solve();
+
+	string inp;
+	cin >> inp;
+	cout << solve(inp) << '\n';
 
 	return 0;
 }

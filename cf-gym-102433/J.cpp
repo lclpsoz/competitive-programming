@@ -14,7 +14,7 @@ using pii = pair<int, int>;
 using vi = vector<int>;
 using vpii = vector<pii>;
 
-const ld EPS = 1e-9;
+const ld EPS = 1e-7;
 inline int cmp(ld x, ld y = 0, ld tol = EPS) {
 	return (x <= y + tol) ? (x + tol < y) ? -1 : 0 : 1;
 }
@@ -29,246 +29,137 @@ using ordered_set = __gnu_pbds::tree<T, M, less<T>, __gnu_pbds::rb_tree_tag, __g
 
 ////////////////////////// Solution starts below. //////////////////////////////
 
-struct node
-{
-	bool dirty = false;
+const int DBG = 0;
+const ld A_MIN = 0, A_MID = acos((ld)-1), A_MAX = 2*acos((ld)-1);
 
-	ll lazy = 0, val = 0;
-	ll l_up, r_up, sz;
-	ll s_up;
-	// neutral values
 
-	node(){}
-
-	template<class base_t>
-	node(const base_t& x, int _sz)
-	{
-		val = 0;
-		sz = _sz;
-	}
-
-	node(const node& l, const node& r)
-	{
-		val = l.val + r.val;
-	}
-
-	node& operator += (const node& p)
-	{
-		lazy += (sz * (p.l_up + p.r_up) / 2) * p.s_up;
-		dirty = true;
-		return *this;
-	}
-
-	void apply()
-	{
-		val += lazy;
-		lazy = 0;
-		dirty = false;
-	}
-};
-
-template<class node_t>
-class segtree
-{
-private:
-	inline int left(int root){ return 2 * root;}
-	inline int right(int root){ return 2 * root + 1;}
-
-	vector<node_t> t;
-	int n;
-
-	template<class base_t>
-	void build(int root, int l, int r, const vector<base_t>& v)
-	{
-		if(l == r)
-		{
-			t[root] = node_t(v[l]);
-			return;
-		}
-
-		int mid = (l + r) / 2;
-		build(left(root), l, mid, v);
-		build(right(root), mid + 1, r, v);
-		t[root] = node_t(t[left(root)], t[right(root)]);
-	}
-
-	void build(int root, int l, int r)
-	{
-		if(l == r)
-		{
-			t[root] = node_t(0, r - l + 1);
-			return;
-		}
-
-		int mid = (l + r) / 2;
-		build(left(root), l, mid);
-		build(right(root), mid + 1, r);
-		t[root] = node_t(t[left(root)], t[right(root)]);
-	}
-		
-	node_t query(int root, int l, int r, int ql, int qr)
-	{
-		if(l > qr || r < ql)
-			return node_t();
-	
-		push(root, l, r);
-
-		if(l >= ql && r <= qr)
-			return t[root];
-		
-		int mid = (l + r) / 2;
-		node_t a = query(left(root), l, mid, ql, qr);
-		node_t b = query(right(root), mid + 1, r, ql, qr);
-		return node_t(a, b);
-	}
-	
-	void update(int root, int l, int r, int ql, int qr, const node_t& v)
-	{
-		push(root, l, r);
-
-		if(l > qr || r < ql) return;
-
-		if(l >= ql && r <= qr)
-		{
-			t[root] += v;
-			push(root, l, r);
-			return;
-		}
-		
-		int mid = (l + r) / 2;
-		update(left(root), l, mid, ql, qr, v);
-		update(right(root), mid + 1, r, ql, qr, v);
-		t[root] = node_t(t[left(root)], t[right(root)]);
-	}
-
-	inline void push(int root, int l, int r)
-	{
-		if(t[root].dirty)
-		{
-			if(l != r)
-			{
-				node aux = t[root];
-				
-				if(t[root].l_up != t[root].r_up)
-					aux.r_up = t[root].l_up + t[left(root)].sz - 1;
-				t[left(root)] += aux;
-				
-				if(t[root].l_up != t[root].r_up)
-				{
-					aux.l_up = aux.r_up + 1;
-					aux.r_up = t[root].r_up;
-				}
-				t[right(root)] += aux;
-			}
-			t[root].apply();
-		}
-	}
-
-public:
-	segtree(int _n = 1) : n(_n)
-	{
-		t.resize(4 * n);
-		build(1, 0, n - 1);
-	}
-
-	template<class base_t>
-	segtree(const vector<base_t>& v) : n(LEN(v))
-	{
-		t.resize(4 * n);
-		build(1, 0, n - 1, v);
-	}
-
-	void update(int l, int r, const node_t& v)
-	{
-		update(1, 0, n - 1, l, r, v);
-	}
-
-	void update(int p, const node_t& v)
-	{
-		update(1, 0, n - 1, p, p, v);
-	}
-
-	node_t query(int l, int r)
-	{
-		return query(1, 0, n - 1, l, r);
-	}
-	
-	node_t query(int p)
-	{
-		return query(1, 0, n - 1, p, p);
-	}
-};
-
+int n;
+vector<pair<pair<ld, bool>, pair<ld, ld>>> pt_sum, pt_sub;
+ld cur_sum, cur_sub;
+ld delta_sum, delta_sub;
 
 int main () {
 	ios_base::sync_with_stdio(false);
     cin.tie(NULL);
     cout.precision(10);
 
-	int n; cin >> n;
-	int P2 = 6283158;
-	segtree<node> seg(P2);
-	ll ans = 0;
-	node up;
+	cin >> n;
+	int l_iter = A_MAX, r_iter = A_MIN;
+	for(int i = 0; i < n; i++) {
+		ld t, s, a;
+		cin >> t >> s >> a;
+		if(DBG)
+			cout << t << ' ' << s << ' ' << a << '\n';
+		if(cmp(t, 0) == 1) {
+			ld delta;
+			delta = min(A_MID, t/s);
 
-	while(n--)
-	{
-		string inp[3];
-		cin >> inp[0] >> inp[1] >> inp[2];
+			ld mx = a+delta;
+			if(cmp(mx, A_MAX) == 1) {
+				pt_sub.push_back({{A_MAX, true}, {s, t-s*(A_MAX-a)}});
 
-		ll now[3] = {0, 0, 0};
-		for(int k = 0; k < 3; k++)
-		{
-			int z = 6;
-			string aux;
-			for(int i = 0; i < LEN(inp[k]); i++)
-			{
-				if(inp[k][i] == '.') z--;
-				else aux.push_back(inp[k][i]);
+				pt_sub.push_back({{0, false}, {s, t-s*(A_MAX-a)}});
+				pt_sub.push_back({{mx-A_MAX, true}, {s, t-s*(mx-a)}});
+			} else
+				pt_sub.push_back({{mx, true}, {s, t-s*(mx-a)}});
+
+			ld mn = a-delta;
+			if(cmp(mn, A_MIN) == -1) {
+				pt_sum.push_back({{0, false}, {s, t-s*a}});
+				pt_sum.push_back({{a, true}, {s, t}});
+
+				pt_sum.push_back({{mn+A_MAX, false}, {s, t-s*(abs(mn)+a)}});
+				pt_sum.push_back({{A_MAX, true}, {s, t-s*a}});
+			} else {
+				pt_sum.push_back({{mn, false}, {s, t-s*(a-mn)}});
+				pt_sum.push_back({{a, true}, {s, t}});
 			}
-			while(z--) aux.push_back('0');
-			ll p = 1;
-			while(!empty(aux))
-				now[k] += p * int(aux.back() - '0'), aux.pop_back(), p *= 10;
-			
-		}
-
-		ans += now[0];
-		// cout << now[0] << " " << now[1] << " " << now[2] << endl;
-
-		ll sz = min(now[0] / now[2], P2 - now[3] - 1);
-		up.s_up = now[1];
-		up.l_up = 0;
-		up.r_up = sz;
-		seg.update(now[3], now[3] + sz, up);
-		
-		if(now[3] + sz + 1 < P2)
-		{
-			up.s_up = now[0];
-			up.l_up = 1;
-			up.r_up = 1;
-			seg.update(now[3] + sz + 1, P2, up);
-		}
-
-		sz = min(now[0] / now[2], now[3]);
-		up.s_up = now[1];
-		up.l_up = sz;
-		up.r_up = 0;
-		seg.update(now[3] - sz, now[3], up);
-		if(now[3] - sz - 1 >= 0)
-		{
-			up.s_up = now[0];
-			up.l_up = 1;
-			up.r_up = 1;
-			seg.update(0, now[3] - sz - 1, up);
+			assert(cmp(a, A_MAX) <= 0);
+			if(DBG) {
+				cout << "sum = " << mn << ", " << a << '\n';
+				cout << "sub = " << a << ", " << mx << "\n\n";
+			}
 		}
 	}
 
-	ll mn = (ll)1e18;
-	for(int i = 0; i < P2; i++)
-		mn = min(mn, seg.query(i).val);
+	auto comp = [&](const pair<pair<ld, bool>, pair<int, ld>> &lhs, const pair<pair<ld, bool>, pair<int, ld>> &rhs) {
+		if(cmp(lhs.x.x, rhs.x.x) == -1)
+			return true;
+		else if(cmp(lhs.x.x, rhs.x.x) == 1)
+			return false;
+		return lhs.x.y < rhs.x.y;
+	};
 
-	cout << (ans - mn) / (1e6) << endl;
+	sort(ALL(pt_sum), comp);
+	reverse(ALL(pt_sum));
+	sort(ALL(pt_sub), comp);
+	reverse(ALL(pt_sub));
+
+	if(DBG) {
+		cout << "pt_sum:\n";
+		for(auto p : pt_sum)
+			cout << p.x.x << ' ' << p.x.y << ",\t s = " << p.y.x << ", s_val = " << p.y.y << '\n';
+		cout << "\npt_sub:\n";
+		for(auto p : pt_sub)
+			cout << p.x.x << ' ' << p.x.y << ",\t s = " << p.y.x << ", s_val = " << p.y.y << '\n';
+	}
+
+	if(DBG)
+		cout << "\n\n______ SIMUL ______\n\n";
+	ld ans = 0;
+	ld t_lst = 0;
+	while(LEN(pt_sum) or LEN(pt_sub)) {
+		ld t_now = 1e22;
+		if(LEN(pt_sum)) t_now = min(t_now, pt_sum.back().x.x);
+		if(LEN(pt_sub)) t_now = min(t_now, pt_sub.back().x.x);
+		if(DBG) {
+			cout << "t_now = " << t_now << '\n';
+			cout << "  delta_sum = " << delta_sum << ", delta_sub = " << delta_sub << '\n';
+			cout.flush();
+		}
+		cur_sum += delta_sum*(t_now-t_lst);
+		cur_sub -= delta_sub*(t_now-t_lst);
+		t_lst = t_now;
+		while(LEN(pt_sum) and cmp(pt_sum.back().x.x, t_now) == 0 and !pt_sum.back().x.y) {
+			auto [info, p] = pt_sum.back();
+			pt_sum.pop_back();
+			auto [s, s_val] = p;
+			cur_sum += s_val;
+			delta_sum += s;
+		}
+		while(LEN(pt_sub) and cmp(pt_sub.back().x.x, t_now) == 0 and !pt_sub.back().x.y) {
+			auto [info, p] = pt_sub.back();
+			pt_sub.pop_back();
+			auto [s, s_val] = p;
+			cur_sub += s_val;
+			delta_sub += s;
+		}
+		
+		while(LEN(pt_sum) and cmp(pt_sum.back().x.x, t_now) == 0 and pt_sum.back().x.y) {
+			auto [info, p] = pt_sum.back();
+			pt_sum.pop_back();
+			auto [s, s_val] = p;
+			cur_sum -= s_val;
+			delta_sum -= s;
+			cur_sub += s_val;
+			delta_sub += s;
+		}
+		while(LEN(pt_sub) and cmp(pt_sub.back().x.x, t_now) == 0 and pt_sub.back().x.y) {
+			auto [info, p] = pt_sub.back();
+			pt_sub.pop_back();
+			auto [s, s_val] = p;
+			cur_sub -= s_val;
+			delta_sub -= s;
+		}
+		if(DBG) {
+			cout << "  cur_sum = " << cur_sum << ", cur_sub = " << cur_sub << "\n\n";
+			cout.flush();
+		}
+		ans = max(ans, cur_sub + cur_sum);
+	}
+
+	cout << fixed << ans << '\n';
+	
 
 	return 0;
 }

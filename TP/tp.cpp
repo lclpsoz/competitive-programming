@@ -14,12 +14,15 @@ using pii = pair<int, int>;
 using vi = vector<int>;
 using vpii = vector<pii>;
 
+template<typename T>
+const T INF = (is_same<T, int>::value ? 1e9 : 1e18);
 const ld EPS = 1e-9;
-inline int cmp(ld x, ld y = 0, ld tol = EPS) {
+const int MOD = 1;
+
+inline int fcmp(ld x, ld y = 0, ld tol = EPS) {
 	return (x <= y + tol) ? (x + tol < y) ? -1 : 0 : 1;
 }
 
-const int MOD = 1;
 inline int mod(ll x, int m = MOD) {
 	return (int)(((x%m) + m)%m);
 }

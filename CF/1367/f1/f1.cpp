@@ -49,18 +49,17 @@ int main () {
 			cin >> v;
 		vi sorted = vec;
 		sort(ALL(sorted));
-		map<int, int> nxt;
-		for(int i = 1; i < n; i++)
-			nxt[sorted[i-1]] = sorted[i];
+		for(int i = 0; i < n; i++)
+			vec[i] = lower_bound(ALL(sorted), vec[i])-sorted.begin();
 		vi lis(n+1, 1);
-		int ans = 0;
-		// for(int i = 0; i < n; i++) {
-		// 	for(int j = 0; j < i; j++)
-		// 		if(nxt[vec[j]] == vec[i])
-		// 			ans = max(lis[i] = lis[j]+1, ans);
-		// 	cout << i << ": " << lis[i] << '\n';
-		// }
-		cout << n-ans << '\n';
+		vi val_idx(n+1);
+		for(int i = 0; i < n; i++)
+			val_idx[vec[i]] = i;
+		for(int i = 0; i < n; i++)
+			if(vec[i] and val_idx[vec[i]-1] < i)
+				lis[i] = lis[val_idx[vec[i]-1]]+1;
+
+		cout << n-*max_element(ALL(lis)) << '\n';
 	}
 
 	return 0;

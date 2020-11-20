@@ -110,22 +110,11 @@ int main () {
 			sum += x;
 			mx = max(mx, x);
 		}
-		// n--;
-		int ans = 0;
-		for(int i = mx;; i++) {
-			sum = sum - mx + i;
-			ans = i-mx;
-			int m = (i*1LL*(n-1))/mdc(i, n-1);
-			cout << "sum = " << sum << ", m = " << m << '\n';
-			if(sum%m == 0){
-				cout << ans << '\n';
-				break;
-			}
-			else if(((sum+m)/m)*m <= mx*n) {
-				cout << ans + (((sum+m)/m)*m)-sum << '\n';
-				break;
-			}
-		}
+
+		ll base = sum;
+		if(sum%(n-1))
+			sum = ((sum+n-1)/(n-1))*(n-1);
+		cout << max((mx*1LL*(n-1)), sum)-base << '\n';
 
 	}
 

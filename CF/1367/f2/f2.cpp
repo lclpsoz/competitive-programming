@@ -35,9 +35,62 @@ using ordered_set = __gnu_pbds::tree<T, M, less<T>, __gnu_pbds::rb_tree_tag, __g
 
 
 int main () {
-	// ios_base::sync_with_stdio(false);
-    // cin.tie(NULL);
-    // cout.precision(10);
+	ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+    cout.precision(10);
+
+	int t;
+	cin >> t;
+	while(t--) {
+		int n;
+		cin >> n;
+		vi vec(n);
+		for(int &v : vec)
+			cin >> v;
+		vi sorted = vec;
+		sort(ALL(sorted));
+		sorted.resize(unique(ALL(sorted)) - sorted.begin());
+		for(int i = 0; i < n; i++)
+			vec[i] = lower_bound(ALL(sorted), vec[i])-sorted.begin();
+		
+		vector<vi> dp(n+5, vi(5));
+		vi mid_ok(n);
+		vector<bool> mid_started(n);
+		for(int i = 0; i < n; i++)
+			mid_ok[vec[i]]++;
+		for(int i = 0; i < n; i++) {
+			// Start
+			dp[vec[i]][0]++;
+
+			// Extend to mid
+			if(vec[i] and !mid_started[vec[i]]) {
+				mid_started[vec[i]] = 1;
+				mid_ok[vec[i]]--;
+				dp[vec[i]][1] = dp[vec[i]-1][0]+1;
+				if(mid_ok[vec[i]-1] == 0)
+					dp[vec[i]][1] = max(dp[vec[i]][1], dp[vec[i]-1][1]+1);
+			}
+			else {
+				mid_ok[vec[i]]--;
+				dp[vec[i]][1]++;
+			}
+
+			// End
+			dp[vec[i]][2]++;
+			if(vec[i]) {
+				dp[vec[i]][2] = max(dp[vec[i]][2], dp[vec[i]-1][0]+1);
+				if(mid_ok[vec[i]-1] == 0)
+					dp[vec[i]][2] = max(dp[vec[i]][2], dp[vec[i]-1][1]+1);
+			}
+			// cout << "i = " << i << ", vec[i] = " << vec[i] << ",\tdp = " << dp[vec[i]][0] << ' ' << dp[vec[i]][1] << ' ' << dp[vec[i]][2] << '\n';
+		}
+
+		int ans = 0;
+		for(int i = 0; i <= n; i++)
+			for(int j = 0; j < 3; j++)
+				ans = max(ans, dp[i][j]);
+		cout << n-ans << '\n';
+	}
 
 	return 0;
 }

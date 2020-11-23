@@ -32,12 +32,49 @@ using ordered_set = __gnu_pbds::tree<T, M, less<T>, __gnu_pbds::rb_tree_tag, __g
 
 ////////////////////////// Solution starts below. //////////////////////////////
 
+ll mat[2020][2020];
 
+void add_mat(int x1, int y1, int x2, int y2, ll v)
+{
+	mat[x2][y2] += v;
+	mat[x1-1][y1-1] += v;
+	mat[x1-1][y2] += -v;
+	mat[x2][y1-1] += -v;
+}
+
+void add(int x1, int x2, int n, int v) {
+	x1 = max(1, x1);
+	x2 = min(x2, n);
+	add_mat(1, x1, n, x2, v);
+	add_mat(x1, 1, x2, n, v);
+	add_mat(x1, x1, x2, x2, -v);
+}
 
 int main () {
-	// ios_base::sync_with_stdio(false);
-    // cin.tie(NULL);
-    // cout.precision(10);
+	ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+    cout.precision(10);
+
+	int n, m, k;
+	cin >> n >> m >> k;
+
+	while(m--) {
+		int x, y;
+		cin >> x >> y;
+		int sz = y-x+1;
+		for(int ln = 1; ln <= min(sz, k); ln++)
+			add(x-k+ln, y-ln+1, n, 1);
+	}
+
+	for(int i = 2010; i >= 0; i--)
+		for(int j = 2010; j >= 0; j--)
+			mat[i][j] = mat[i][j] + mat[i+1][j] + mat[i][j+1] - mat[i+1][j+1];
+
+	ll ans = 0;
+	for(int i = 1; i <= n; i++)
+		for(int j = 1; j <= n; j++)
+			ans = max(ans,mat[i][j]);
+	cout << ans << '\n';
 
 	return 0;
 }

@@ -32,12 +32,74 @@ using ordered_set = __gnu_pbds::tree<T, M, less<T>, __gnu_pbds::rb_tree_tag, __g
 
 ////////////////////////// Solution starts below. //////////////////////////////
 
+const int N = 1e5 + 10;
 
+int age[N];
+vpii parties[N], parties_o[N];
+vpii actives;
+int ans[N];
+vi adj[N];
+ll bit[N];
+
+ll sum(int p) {
+	ll ret = 0;
+	for(int i = p; i; i -= i&-i)
+		ret += bit[i];
+	return ret;
+}
+
+void add(int p, int v) {
+	for(int i = p; i < N; i+=i&-i)
+		bit[i] += v;
+}
+
+void solve(int v, int p) {
+	for(pii party : parties[v])
+		add(party.x, 1);
+	ans[v] = sum(age[v]);
+	for(int u : adj[v])
+		solve(u, v);
+	for(pii party : parties[v])
+		add(party.x, -1);
+}	
+
+void dfs_up(int v, int p) {
+	actives.push_back({-age[v], v});
+	for(pii party : parties_o[v]) {
+		auto it = lower_bound(ALL(actives), make_pair(-party.y, -INF<int>));
+		parties[it->y].push_back(party);
+	}
+	for(int u : adj[v]) {
+		dfs_up(u, v);
+	}
+	actives.pop_back();
+}
 
 int main () {
-	// ios_base::sync_with_stdio(false);
-    // cin.tie(NULL);
-    // cout.precision(10);
+	ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+    cout.precision(10);
+
+	int n, m;
+	cin >> n >> m;
+	for(int i = 1; i <= n; i++) {
+		int p;
+		cin >> age[i];
+		cin >> p;
+		if(i>1)
+			adj[p].push_back(i);
+	}
+
+	while(m--) {
+		int o, l, r;
+		cin >> o >> l >> r;
+		parties_o[o].push_back({l, r});
+	}
+	dfs_up(1, 1);
+
+	solve(1, 1);
+	for(int i = 1; i <= n; i++)
+		cout << ans[i] << " \n"[i==n];
 
 	return 0;
 }

@@ -32,65 +32,49 @@ using ordered_set = __gnu_pbds::tree<T, M, less<T>, __gnu_pbds::rb_tree_tag, __g
 
 ////////////////////////// Solution starts below. //////////////////////////////
 
+const int N = 2e5 + 10;
 
+vpii adj[N];
+int ans[N];
+bitset<N> fr;
+
+void solve(int v, int p, int bef) {
+	int nxt = 1 + (!fr[v] and bef==1);
+	for(auto &[u, e] : adj[v])
+		if(u != p) {
+			ans[e] = nxt;
+			solve(u, v, nxt);
+			if(!fr[v]) {
+				nxt++;
+				nxt+=bef==nxt;
+			}
+		}
+}
 
 int main () {
 	ios_base::sync_with_stdio(false);
     cin.tie(NULL);
     cout.precision(10);
 
-	int n;
-	cin >> n;
-	vi vec;
-	for(int i = 0; i < n; i++) {
-		int x;
-		cin >> x;
-		vec.push_back(x);
+	int n, k;
+	cin >> n >> k;
+	for(int i = 1; i < n; i++) {
+		int x, y;
+		cin >> x >> y;
+		adj[x].push_back({y, i});
+		adj[y].push_back({x, i});
 	}
-	
-	vector<pair<int, pii>> all_pairs;
-	for(int i = 0; i < n; i++) {
-		set<int> vals;
-		int s = 0;
-		for(int j = i; j < n; j++) {
-			s += vec[j];
-			if(vals.count(s) == 0) {
-				vals.insert(s);
-				all_pairs.push_back({s, {j, i}});
-			}
-		}
-	}
-	int ans = 0;
-	vpii ans_vec;
-	sort(ALL(all_pairs));
-	int cur_val = -1e9;
-	int l_used = -1;
-	int now = 0;
-	vpii vec_now;
-	for(auto &[val, pp] : all_pairs) {
-		if(val != cur_val) {
-			if(now > ans) {
-				ans = now;
-				ans_vec.swap(vec_now);
-			}
-			cur_val = val;
-			l_used = -1;
-			now = 0;
-			vec_now.clear();
-		}
-		if(l_used < pp.y) {
-			l_used = pp.x;
-			++now;
-			vec_now.push_back({pp.y, pp.x});
-		}
-	}
-	if(now > ans) {
-		ans = now;
-		ans_vec.swap(vec_now);
-	}
-	cout << ans << '\n';
-	for(auto [x, y] : ans_vec)
-		cout << x+1 << ' ' << y+1 << '\n';
+	vpii vec;
+	for(int i = 1; i <= n; i++)
+		vec.push_back({LEN(adj[i]), i});
+	sort(ALL(vec));
+	reverse(ALL(vec));
+	for(int i = 0; i < k; i++)
+		fr[vec[i].y] = 1;
+	cout << vec[k].x << '\n';
+	solve(vec[0].y, vec[0].y, -1);
+	for(int i = 1; i < n; i++)
+		cout << ans[i] << " \n"[i==n-1];
 
 	return 0;
 }

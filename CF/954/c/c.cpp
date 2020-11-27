@@ -35,9 +35,42 @@ using ordered_set = __gnu_pbds::tree<T, M, less<T>, __gnu_pbds::rb_tree_tag, __g
 
 
 int main () {
-	// ios_base::sync_with_stdio(false);
-    // cin.tie(NULL);
-    // cout.precision(10);
+	ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+    cout.precision(10);
+
+	set<int> st;
+	int n;
+	cin >> n;
+	int bef;
+	vi vec;
+	cin >> bef;
+	vec.push_back(bef);
+	for(int i = 1; i < n; i++) {
+		int now;
+		cin >> now;
+		st.insert(abs(now-bef));
+		bef = now;
+		vec.push_back(bef);
+	}
+	st.erase(1);
+	if(LEN(st) > 1 or (LEN(st) == 1 and *st.begin() == 0))
+		cout << "NO\n";
+	else if(LEN(st) == 0)
+		cout << "YES\n1000000000 1\n";
+	else {
+		int y = *st.begin();
+		for(int i = 1; i<n; i++) {
+			bef = vec[i-1];
+			int now = vec[i];
+			if(now < bef) swap(now, bef);
+			if(((now-1)%y == 0 and bef == now-1)) {
+				cout << "NO\n";
+				exit(0);
+			}
+		}
+		cout << "YES\n1000000000 " << y << "\n";
+	}
 
 	return 0;
 }

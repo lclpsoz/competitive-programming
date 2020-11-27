@@ -32,11 +32,12 @@ using ordered_set = __gnu_pbds::tree<T, M, less<T>, __gnu_pbds::rb_tree_tag, __g
 
 ////////////////////////// Solution starts below. //////////////////////////////
 
-const int N = 5e5 + 10;
+const int MAXV = 5e5+10;
 
 struct seg_tree {
 	int n;
 	vpii seg;
+	const pii P_INF = {INF<int>, INF<int>};
 
 	seg_tree(int _n) : n(_n) {
 		seg = vpii(4*n);
@@ -45,7 +46,7 @@ struct seg_tree {
 
 	void build(int v, int tl, int tr) {
 		if(tl == tr)
-			seg[v] = {n, INF<int>};
+			seg[v] = P_INF;
 		else {
 			int tm = (tl+tr)/2;
 			build(2*v, tl, tm);
@@ -57,14 +58,13 @@ struct seg_tree {
 		}
 	}
 
-	void upd(int pos, pii pp, int v, int tl, int tr) {
+	void upd(int v, int tl, int tr, int pos, pii val) {
 		if(tl == tr and tl == pos)
-			seg[v] = pp;
-		else if(tl <= pos and pos <= tr) {
+			seg[v] = val;
+		else if(tl <= pos and pos <= tr){
 			int tm = (tl+tr)/2;
-			upd(pos, pp, 2*v, tl, tm);
-			upd(pos, pp, 2*v+1, tm+1, tr);
-
+			upd(2*v, tl, tm, pos, val);
+			upd(2*v+1, tm+1, tr, pos, val);
 			if(seg[2*v].x < seg[2*v+1].x)
 				seg[v] = seg[2*v];
 			else
@@ -72,41 +72,31 @@ struct seg_tree {
 		}
 	}
 
-	void upd(int pos, pii pp) {
-		// cerr << "upd: " << pos << ", pp = " << pp.x << ' ' << pp.y << '\n';
-		upd(pos, pp, 1, 1, n);
+	void upd(int pos, pii val) {
+		upd(1, 1, n, pos, val);
 	}
 
+	void upd_clear(int pos) {
+		upd(1, 1, n, pos, P_INF);
+	}
+	
 	pii qry(int v, int tl, int tr, int l, int r) {
-		// cerr << "    qrt(" << l << ") = " << "t = " << tl << ' ' << tr << ", SEG[V] = " << seg[v].x << ' ' << seg[v].y << '\n';
 		if(l <= tl and tr <= r)
 			return seg[v];
-		else {
+		else if(l <= tr and tl <= r) {
 			int tm = (tl+tr)/2;
-
-			pii ret = {INF<int>, INF<int>};
-			if(tl <= r and l <= tm) {
-				pii now = qry(2*v, tl, tm, l, r);
-				// cerr << "      FRT qrt(" << l << ") = " << "t = " << tl << ' ' << tr << "now = " << now.x << ' ' << now.y << '\n';
-				if(now.x < ret.x)
-					ret = now;
-			}
-			if(tm+1 <= r and l <= tr) {
-				pii now = qry(2*v+1, tm+1, tr, l, r);
-				// cerr << "      SEC qrt(" << l << ") = " << "t = " << tl << ' ' << tr << "now = " << now.x << ' ' << now.y << '\n';
-				if(now.x < ret.x)
-					ret = now;
-			}
-			
+			pii ret = qry(2*v, tl, tm, l, r);
+			pii now = qry(2*v+1, tm+1, tr, l, r);
+			// cerr << "|| l = " << l << ", " << r << " : " << ret.x << ' ' << ret.y << ' ' << now.x << ' ' << now.y << '\n';
+			if(now.x < ret.x)
+				ret = now;
 			return ret;
 		}
+		return P_INF;
 	}
 
-	pii qry(int l) {
-
-		pii pp = qry(1, 1, n, l, n);
-		// cerr << "qry(" << l << "): " << pp.x << ' ' << pp.y << '\n';
-		return pp;
+	pii qry(int l, int r) {
+		return qry(1, 1, n, l, r);
 	}
 };
 
@@ -117,14 +107,16 @@ int main () {
 
 	int n;
 	cin >> n;
-	vi vec(n), lft(n);
+	vi vec(n);
 	for(int &v : vec)
 		cin >> v;
-	vi idx(N, -1);
-	for(int i = 0; i < LEN(vec); i++) {
-		lft[i] = idx[vec[i]]+1;
-		idx[vec[i]] = i;
+	
+	vi idx(MAXV), lft(n);
+	for(int i = 0; i < n; i++) {
+		lft[i] = idx[vec[i]];
+		idx[vec[i]] = i+1;
 	}
+
 	int m;
 	cin >> m;
 	vector<pair<pii, int>> queries;
@@ -133,27 +125,27 @@ int main () {
 		cin >> l >> r;
 		queries.push_back({{r, l}, i});
 	}
-
-	seg_tree seg(n);
 	sort(ALL(queries));
-	int pos = 0;
+
 	vi ans(m);
-	for(int r = 1; r <= n and pos < LEN(queries); r++) {
-		// cerr << "r = " << r << '\n';
-		if(lft[r-1] > 0)
-			seg.upd(lft[r-1], {INF<int>, INF<int>});
-		seg.upd(r, {lft[r-1], vec[r-1]});
-		while(pos < LEN(queries) and queries[pos].x.x == r) {
-			auto &[coord, pos_ans] = queries[pos];
+	int pos_q = 0;
+	seg_tree seg(n);
+	for(int r_cur = 1; r_cur <= n and pos_q < LEN(queries); r_cur++) {
+		int pos_bef = lft[r_cur-1];
+		if(pos_bef)
+			seg.upd_clear(pos_bef);
+		seg.upd(r_cur, {pos_bef, vec[r_cur-1]});
+		while(pos_q < LEN(queries) and queries[pos_q].x.x == r_cur) {
+			auto &[coord, pos_ans] = queries[pos_q];
 			swap(coord.x, coord.y);
-			pii pp = seg.qry(coord.x);
-			if(pp.x < coord.x)
-				ans[pos_ans] = pp.y;
-			pos++;
+			pii now = seg.qry(coord.x, r_cur);
+			if(now.x < coord.x)
+				ans[pos_ans] = now.y;
+			++pos_q;
 		}
 	}
 
-	for(int v : ans)
+	for(int &v : ans)
 		cout << v << '\n';
 
 	return 0;

@@ -32,12 +32,88 @@ using ordered_set = __gnu_pbds::tree<T, M, less<T>, __gnu_pbds::rb_tree_tag, __g
 
 ////////////////////////// Solution starts below. //////////////////////////////
 
+const int DBG = 0;
 
+vector<ll> nxt_vec(5e5+10);
+
+ll eval(vector<ll> &vec, int len_r, ll mx, ll k) {
+	ll sum = 0;
+	ll min_k = 0;
+	for(int i = 0; i < LEN(vec); i++) {
+		sum -= nxt_vec[i];
+		nxt_vec[i] = 0;
+		ll now = vec[i] + sum;
+		ll to_add = mx-now;
+		// if(DBG)
+		// 	cerr << "min_k = " << min_k << '\n';
+		if(to_add > 0) {
+			if(i+len_r < LEN(vec))
+				nxt_vec[i+len_r] = to_add;
+			sum += to_add;
+			min_k += to_add;
+			if(min_k > k) {
+				while(i < LEN(vec)) nxt_vec[i++] = 0;
+				return false;
+			}
+		}
+	}
+
+	return true;
+}
 
 int main () {
-	// ios_base::sync_with_stdio(false);
-    // cin.tie(NULL);
-    // cout.precision(10);
+	ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+    cout.precision(10);
+
+	int n, rn;
+	ll k;
+	cin >> n >> rn >> k;
+	vector<ll> delta(n), vec(n), base(n);
+	for(ll &v : base) cin >> v;
+	ll cur_sum = 0;
+	if(DBG)
+		cerr << "vec_1: ";
+	for(int i = 0; i < n; i++) {
+		cur_sum += base[i];
+		if(i+rn < n)
+			delta[i+rn] += base[i];
+		vec[i] = cur_sum;
+		if(DBG)
+			cerr << vec[i] << " \n"[i==n-1];
+		cur_sum -= delta[i];
+		delta[i] = 0;
+	}
+	cur_sum = 0;
+	if(rn)
+		for(int i = n-1; i >= 0; i--) {
+			if(i-rn >= 0)
+				delta[i-rn] += base[i];
+			vec[i] += cur_sum;
+			cur_sum += base[i];
+
+			cur_sum -= delta[i];
+			delta[i] = 0;
+		}
+
+	if(DBG) {
+		cerr << "vec: ";
+		for(int i = 0; i < n; i++)
+			cerr << vec[i] << " \n"[i==n-1];
+	}
+	int len_r = 2*rn+1;
+	ll l = 0, r = 2*INF<ll>;
+	while(l < r) {
+		ll md = (l+r+1)/2;
+		if(DBG)
+			cerr << l << ' ' << md << ' ' << r << '\n';
+		if(eval(vec, len_r, md, k))
+			l = md;
+		else
+			r = md-1;
+	}
+	cout << l << '\n';
+
 
 	return 0;
 }

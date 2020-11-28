@@ -32,12 +32,60 @@ using ordered_set = __gnu_pbds::tree<T, M, less<T>, __gnu_pbds::rb_tree_tag, __g
 
 ////////////////////////// Solution starts below. //////////////////////////////
 
+vi bfs(int n, int st, vector<vi> &adj) {
+	vi dist(n+1, INF<int>);
+	queue<pii> q;
+	q.push({st, 0});
+	while(!q.empty()) {
+		auto [v, d] = q.front();
+		q.pop();
+		if(dist[v] != INF<int>) continue;
+		dist[v] = d;
+		for(int u : adj[v])
+			q.push({u, d+1});
+	}
 
+	return dist;
+}
 
 int main () {
-	// ios_base::sync_with_stdio(false);
-    // cin.tie(NULL);
-    // cout.precision(10);
+	ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+    cout.precision(10);
+
+	int n, m, s, t;
+	cin >> n >> m >> s >> t;
+	vector<vi> adj(n+1);
+	set<pii> roads;
+	for(int i = 1; i <= n; i++)
+		for(int j = i+1; j <= n; j++)
+			roads.insert({i, j});
+
+	while(m--) {
+		int u, v;
+		cin >> u >> v;
+		if(u > v) swap(u,v);
+		adj[u].push_back(v);
+		adj[v].push_back(u);
+		roads.erase({u, v});
+	}
+
+	vi dist_s = bfs(n, s, adj);
+	vi dist_t = bfs(n, t, adj);
+	// for(int i = 1; i <= n; i++)
+	// 	cerr << i << ": " << dist_s[i] << ' ' << dist_t[i] << '\n';
+	int min_dist = dist_s[t];
+	assert(dist_t[s] == min_dist);
+	int ans = 0;
+	for(auto &[u, v] : roads) {
+		int cur_dist = min((dist_s[u] + dist_t[v]+1),
+							(dist_s[v] + dist_t[u]+1));
+		if(cur_dist >= min_dist) {
+			++ans;
+			// cerr << u << ' ' << v << '\n';
+		}
+	}
+	cout << ans << '\n';
 
 	return 0;
 }

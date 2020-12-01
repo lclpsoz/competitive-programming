@@ -1,82 +1,68 @@
 #include "bits/stdc++.h"
+#include "ext/pb_ds/tree_policy.hpp"
+#include "ext/pb_ds/assoc_container.hpp"
 using namespace std;
-
 ////////////// Prewritten code follows. Look down for solution. ////////////////
 #define x first
 #define y second
-#define len(x) ((int)(x).size())
-using pii = pair<int, int>;
+#define LEN(x) ((int)(x).size())
+#define ALL(x) x.begin(), x.end()
 using ll = long long;
 using llu = long long unsigned;
 using ld = long double;
+using pii = pair<int, int>;
+using vi = vector<int>;
+using vpii = vector<pii>;
 
+template<typename T>
+const T INF = (is_same<T, int>::value ? 1e9 : 1e18);
 const ld EPS = 1e-9;
-inline int cmp(ld x, ld y = 0, ld tol = EPS) {
+const int MOD = 1;
+
+inline int fcmp(ld x, ld y = 0, ld tol = EPS) {
 	return (x <= y + tol) ? (x + tol < y) ? -1 : 0 : 1;
 }
 
-const int MOD = 1;
-inline int mod (ll x, int m = MOD) {
+inline int mod(ll x, int m = MOD) {
 	return (int)(((x%m) + m)%m);
 }
 
+template<typename T, typename M = __gnu_pbds::null_type>
+using ordered_set = __gnu_pbds::tree<T, M, less<T>, __gnu_pbds::rb_tree_tag, __gnu_pbds::tree_order_statistics_node_update>;
+
 ////////////////////////// Solution starts below. //////////////////////////////
 
-int n;
-stack<pii> st;
+
 
 int main () {
-	scanf ("%d", &n);
-	if (n == 1) {
-		printf ("YES\n");
-		return 0;
-	}
+	ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+    cout.precision(10);
 
-	int mx = -1;
-	for (int i = 1; i <= n; i++) {
+	int n;
+	cin >> n;
+	vpii vec;
+		int mx = 0;
+	while(n--) {
 		int x;
-		scanf ("%d", &x);
-		mx = max (x, mx);
-		int pos = i;
-		while (!st.empty() and st.top().x == x) {
-			pos = st.top().y;
-			st.pop();
+		cin >> x;
+		mx = max(x, mx);
+		if(LEN(vec)) {
+			if(vec.back().x%2 == x%2)
+				vec.pop_back();
+			else 
+				vec.push_back({x, 1});
 		}
-		while (!st.empty() and st.top().x < x)
-			if ((i-st.top().y) % 2 != 0) {
-				pii ax = st.top();
-				st.pop();
-				if (!st.empty() and (i-st.top().y)%2 == 1) {
-					printf ("NO\n");
-					return 0;
-				} else {
-					if (!st.empty()) st.pop(); // The before one
-					st.push ({ax.x+2, ax.y});
-				}
-			} else
-				st.pop();
-		if (st.empty() or st.top().x > x)
-			st.push ({x, pos});
+		else {
+			vec.push_back({x, 1});
+		}
+
 	}
-	int x = mx;
-	int i = n+1;
-	while (!st.empty() and st.top().x == x)
-		st.pop();
-	while (!st.empty() and st.top().x < x)
-		if ((i-st.top().y) % 2 != 0) {
-			pii ax = st.top();
-			st.pop();
-			if (!st.empty() and (i-st.top().y)%2 == 1) {
-				printf ("NO\n");
-				return 0;
-			} else {
-				if (!st.empty()) st.pop(); // The before one
-				st.push ({ax.x+2, ax.y});
-			}
-		} else
-			st.pop();
-	
-	printf ("YES\n");
+	if(LEN(vec) > 1)
+		cout << "NO\n";
+	else
+		cout << "YES\n";
+
 
 	return 0;
 }

@@ -32,49 +32,35 @@ using ordered_set = __gnu_pbds::tree<T, M, less<T>, __gnu_pbds::rb_tree_tag, __g
 
 ////////////////////////// Solution starts below. //////////////////////////////
 
+vpii sq(4);
+vi cnt(4);
+vi vals_x(4), vals_y(4);
+vpii pts(4);
 
-ll calc_dist(vpii &pts, vpii &sq) {
-	vector<pair<ll, ll>> dists;
-	vi cnt(4);
-	vector<ll> mini(4, INF<ll>);
-	vector<vector<ll>> vals(4);
+ll eval(int sz) {
 	ll ret = 0;
+	sq[1].x = sz;
+	sq[2].x = sz;
+	sq[2].y = sz;
+	sq[3].y = sz;
 	for(int i = 0; i < 4; i++) {
-		dists.push_back({sq[i].x-pts[i].x, sq[i].y-pts[i].y});
-		ret += abs(dists.back().x) + abs(dists.back().y);
-		if(dists.back().x > 0) {
-			cnt[0]++;
-			vals[0].push_back(abs(dists.back().x));
-		}
-		if(dists.back().x < 0)
-			cnt[1]++, vals[1].push_back(abs(dists.back().x));
-		if(dists.back().y > 0)
-			cnt[2]++, vals[2].push_back(abs(dists.back().y));
-		if(dists.back().y < 0)
-			cnt[3]++, vals[3].push_back(abs(dists.back().y));
+		vals_x[i] = sq[i].x-pts[i].x;
+		vals_y[i] = sq[i].y-pts[i].y;
 	}
+	sort(ALL(vals_x));
+	sort(ALL(vals_y));
+	int delta_x = 0;
+	int delta_y = 0;
+	if(vals_x[2] < 0)
+		delta_x += vals_x[2];
+	if(vals_x[1] > 0)
+		delta_x += vals_x[1];
+	if(vals_y[2] < 0)
+		delta_y += vals_y[2];
+	if(vals_y[1] > 0)
+		delta_y += vals_y[1];
 	for(int i = 0; i < 4; i++)
-		if(cnt[i] > 2) {
-			sort(ALL(vals[i]));
-			ret -= (cnt[i] == 3 ? 2 : 4)*vals[i][0];
-			if(cnt[i] == 4) {
-				ret -= 2*(vals[i][1]-vals[i][0]);
-			}
-
-		}
-
-	return ret;
-}
-
-ll eval(ll sz, vpii vec) {
-	ll ret = 1e18;
-	vpii sq = {	{0, 0},
-				{sz, 0},
-				{sz, sz},
-				{0, sz}};
-	do {
-		ret = min(ret, calc_dist(vec, sq));
-	} while(next_permutation(ALL(vec)));
+		ret += abs(vals_x[i]-delta_x) + abs(vals_y[i]-delta_y);
 
 	return ret;
 }
@@ -87,33 +73,22 @@ int main () {
 	int t;
 	cin >> t;
 	while(t--) {
-		vpii pts;
-		int mx = -1;
-		for(int i = 0; i < 4; i++) {
-			int x, y;
+		for(auto &[x, y] : pts)
 			cin >> x >> y;
-			pts.push_back({x, y});
-			mx = max(mx, y);
-			mx = max(mx, x);
-		}
-		ll l = 0, r = mx+1;
+		// cerr << "l = " << l << '\n';
 		sort(ALL(pts));
-		int mx_op = 1e3;
-		while(l < r-2 and mx_op--) {
-			ll tl = (2*l + r)/3;
-			ll tr = (l + 2*r)/3;
-			// cerr << l << ' ' << r << '\n';
-			// cerr << eval(l, pts) << ' ' << eval(r, pts) << '\n';
-			if(eval(tl, pts) > eval(tr, pts))
-				l = tl;
-			else
-				r = tr;
-		}
 		ll ans = INF<ll>;
-		for(int i = max(0LL, l-2); i < r+2; i++)
-			ans = min(ans, eval(i, pts));
-		// for(int i = 0; i < 8; i++)
-		// 	cerr << "eval(" << i << ") = " << eval(i, pts) << '\n';
+		do {
+			int l = 0, r = INF<int>;
+			while(l < r) {
+				int md = (l+r)/2;
+				if(eval(md) > eval(md+1))
+					l = md+1;
+				else
+					r = md;
+			}
+			ans = min(ans, eval(l));
+		} while(next_permutation(ALL(pts)));
 		cout << ans << '\n';
 	}
 

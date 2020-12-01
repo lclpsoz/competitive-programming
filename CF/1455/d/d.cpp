@@ -51,7 +51,6 @@ int main () {
 		cin >> n >> x;
 		vi vec(n);
 		for(int &v : vec) cin >> v;
-		vec.resize(unique(ALL(vec)) - vec.begin());
 		if(ordered(vec))
 			cout << "0\n";
 		else {

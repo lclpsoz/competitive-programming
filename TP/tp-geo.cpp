@@ -1,25 +1,3 @@
-#include "bits/stdc++.h"
-using namespace std;
-
-////////////// Prewritten code follows. Look down for solution. ////////////////
-#define x first
-#define y second
-#define len(x) ((int)(x).size()) // Be careful with spaces!!!
-using pii = pair<int, int>;
-using ll = long long;
-using llu = long long unsigned;
-using ld = long double;
-
-const ld EPS = 1e-9;
-inline int cmp(ld x, ld y = 0, ld tol = EPS) {
-	return (x <= y + tol) ? (x + tol < y) ? -1 : 0 : 1;
-}
-
-const int MOD = 1;
-inline int mod (ll x, int m = MOD) {
-	return (int)(((x%m) + m)%m);
-}
-
 //////////////////////// GEOMETRY ////////////////////////
 
 using T = ld;
@@ -83,16 +61,10 @@ struct line {
 
 bool inter (line l1, line l2, pt &out) {
 	T d = cross (l1.v, l2.v);
-	if (cmp (d) == 0) return false;
+	if (fcmp (d) == 0) return false;
 	out = (l2.v*l1.c - l1.v*l2.c) / d; // Require ld
 
 	return true;
 }
 
-////////////////////////// Solution starts below. //////////////////////////////
-
-int main ()
-{
-	
-	return 0;
-}
+////////////////////////// End of GEOMETRY. //////////////////////////////

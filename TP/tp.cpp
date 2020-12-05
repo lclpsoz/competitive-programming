@@ -36,8 +36,8 @@ using ordered_set = __gnu_pbds::tree<T, M, less<T>, __gnu_pbds::rb_tree_tag, __g
 
 int main () {
 	// ios_base::sync_with_stdio(false);
-    // cin.tie(NULL);
-    // cout.precision(10);
+	// cin.tie(NULL);
+	// cout.precision(10);
 
 	return 0;
 }

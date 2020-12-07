@@ -34,34 +34,21 @@ using ordered_set = __gnu_pbds::tree<T, M, less<T>, __gnu_pbds::rb_tree_tag, __g
 
 ll brute_ans (ll s1, ll s2, ll xl, ll xr) {
 	ll ans = 0;
-	// for (ll x = xl; x <= xr; x++)
-	// 	cout << bitset<4>(x) << '\n';
-
 	for (ll x = xl; x <= xr; x++) {
 		ll val = ((s1 * 1ll * x) ^ (s2 * 1ll * x));
-		// cout << x << ": " << bitset<5>(val) << '\n';
 		ll sum = val % MOD;
 		ans = (ans + sum) % MOD;
-		// cout << "  sum = " << sum << ", ans = " << ans << '\n';
 	}
 	return ans;
 }
 
-int dp[100][2];
 int target[100];
 
 ll solve (int pos, bool smaller, string &number) {
-	// for (int i = 0; i < 2*pos; i++) cout << ' ';
-	// cout << number << ": " << pos << ' ' << smaller << '\n';
-
 	if (pos == -1)
 		return 1LL;
 
 	ll ret;
-	// int &ret = dp[pos][smaller];
-	// if (ret != -1)
-	// 	return ret;
-
 	if (target[pos] == -1) {
 		if (smaller)
 			ret = 2*solve (pos-1, smaller, number);
@@ -106,7 +93,6 @@ ll solve (string &number, int p1, int c1, int p2 = -1, int c2 = -1) {
 string bin_string (ll val) {
 	if (val == 0) return "0";
 	memset(target, -1, sizeof target);
-	// cerr << val << ": " << bitset<70>(val) << endl;
 	string number = bitset<70>(val).to_string();
 	reverse(ALL(number));
 	while (number.back() == '0') number.pop_back();
@@ -116,30 +102,20 @@ string bin_string (ll val) {
 
 int main () {
 	freopen("geometry.in", "r", stdin);
-	// freopen("FILE_NAME_OUTPUT.EXTENSION", "w", stdout);
 	ios_base::sync_with_stdio(false);
 	cin.tie(NULL);
 	cout.precision(10);
 
-
 	memset(target, -1, sizeof target);
-
-	// string number = bin_string((1LLU<<62) - 1);
-	// cerr << solve(0, 0, number) << '\n';
-	// test_count_bit();
-
 	int t;
 	cin >> t;
 	map<ll, int> mp;
 	while (t--) {
-		// cerr << "t = " << t << '\n';
 		ll s1, s2, xl, xr;
 		cin >> s1 >> s2 >> xl >> xr;
 		ll ans = 0;
 		if (s1 > s2) swap(s1, s2);
 		if (s1 < s2) {
-			// ll ans_brute = brute_ans (s1, s2, xl, xr);
-			// cout << "brute = " << ans_brute << '\n';
 			int k1 = __builtin_ctzll(s1);
 			int k2 = __builtin_ctzll(s2);
 			int SHIFT = k2-k1;
@@ -150,8 +126,6 @@ int main () {
 			reverse(ALL(number_xl));
 			reverse(ALL(number_xr));
 			for (int i = 0; i < min(LEN(number_xr), SHIFT); i++) {
-				// cerr << "  i = " << i << '\n';
-				
 				ll val_r = solve(number_xr, i, 1);
 				ll val_l = 0;
 				if (xl > 1 and i < LEN(number_xl))
@@ -162,10 +136,7 @@ int main () {
 				ans = (ans+(s1*mlt)%MOD)%MOD;
 			}
 
-			// cout << "\n__ TWO __\n";
 			for (int i = 0; i < LEN(number_xr); i++) {
-				// cerr << "  i = " << i << '\n';
-				
 				ll val_r = solve(number_xr, i, 1, i+SHIFT, 0);
 				
 				ll val_l = 0;
@@ -185,7 +156,6 @@ int main () {
 					ans = (ans + (s1*((v1*pw)%MOD)))%MOD;
 				};
 			}
-			// assert(ans_brute == ans%MOD);
 		}
 		cout << ans << endl;
 	}

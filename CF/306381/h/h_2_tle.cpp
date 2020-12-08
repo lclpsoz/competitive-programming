@@ -37,52 +37,49 @@ const int N = 2e5 + 10;
 int n, m;
 ll vals[N];
 vpii adj[N];
-bitset<N> invalid;
-set<int> vis[N];
+bitset<N> vis;
 
 void dijkstra () {
-	set<pair<int, pair<ll, int>>> dij;
-	vi mp(n+1), mp_back(n+1);
-	for (int i = 1; i <= n; i++)
-		mp[i] = i;
-	// random_shuffle(ALL(mp));
-	for (int i = 1; i <= n; i++)
-		mp_back[mp[i]] = i;
-	for (int v = 1; v <= n; v++)
-		for (auto [u, w] : adj[v])
-			dij.insert({mp[v], {w, u}});
+	set<pair<ll, int>> dij;
+	vi vis_vals;
+	for (int st_v = 1; st_v <= n; st_v++) {
+		dij.clear();
+		// cerr << "st_v = " << st_v << '\n';
+		for (auto [u, w] : adj[st_v])
+			dij.insert({w, u});
 
-	
-	while (LEN(dij)) {
-		auto [st, _pp] = *dij.begin();
-		dij.erase(dij.begin());
-		auto [d, v] = _pp;
-		st = mp_back[st];
-		// cerr << "st = " << st << ", v = " << v << ", d = " << d << '\n';
-		if (invalid[st] or vis[st].count(v) != 0)
-			continue;
-		if (vals[v] != d) { // d == dist[v][st]
-			// cerr << "invalid[" << st << "] = 1" << "\n";
-			invalid[st] = 1;
-			vis[st].clear();
-			continue;
+		while (LEN(dij)) {
+			auto [d, v] = *dij.begin();
+			dij.erase(dij.begin());
+			// cerr << "  v = " << v << ", d = " << d << '\n';
+			if (vis[v])
+				continue;
+			if (vals[v] != d) {
+				// cerr << "invalid[" << st << "] = 1" << "\n";
+				break;
+			}
+			vis[v] = 1;
+			vis_vals.push_back(v);
+			for (auto [u, w] : adj[v])
+				if (!vis[u])
+					dij.insert({d+w, u});
 		}
-		vis[st].insert(v);
-		if (LEN(vis[st]) == n) break;
-		for (auto [u, w] : adj[v])
-			dij.insert({mp[st], {d+w, u}});
-	}
-
-	for (int i = 1; i <= n; i++)
-		if (LEN(vis[i]) == n) {
-			cout << i << '\n';
+		if (LEN(vis_vals) == n) {
+			cout << st_v << '\n';
 			exit(0);
 		}
+
+		while (LEN(vis_vals)) {
+			vis[vis_vals.back()] = 0;
+			vis_vals.pop_back();
+		}
+	}
+
 	cout << "-1\n";
 }
 
 int main () {
-	freopen("hide.in", "r", stdin);
+	// freopen("hide.in", "r", stdin);
 	// freopen("FILE_NAME_OUTPUT.EXTENSION", "w", stdout);
 	ios_base::sync_with_stdio(false);
 	cin.tie(NULL);

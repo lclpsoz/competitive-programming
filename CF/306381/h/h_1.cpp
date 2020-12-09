@@ -66,11 +66,13 @@ int main () {
 	sort(ALL(order));
 	reverse(ALL(order));
 
-	set<int> processed, valid;
+	set<int> processed;
+	vi valid(n+1, -INF<int>);
 	processed.insert(order.back().y);
+	int valid_checks = 0;
 	for (auto [u, w] : adj[order.back().y])
 		if (w == order.back().x)
-			valid.insert(u);
+			valid[u] = 0;
 
 	order.pop_back();
 	while (LEN(order)) {
@@ -87,28 +89,24 @@ int main () {
 					all_valid = true;
 			}
 			if (w < dist[v])
-				valid.erase(u);
+				valid[u] = -INF<int>;
 			else if (w == dist[v])
 				keep_valid.push_back(u);
 		}
-		vi to_rem;
 		if (!all_valid) {
-			int p = 0;
-			for (int u : valid) {
-				while (p < LEN(keep_valid) and keep_valid[p] < u)
-					++p;
-				if (p == LEN(keep_valid) or keep_valid[p] != u)
-					to_rem.push_back(u);
-			}
-			for (int u : to_rem)
-				valid.erase(u);
+			for (int u : keep_valid)
+				valid[u]++;
+			valid_checks++;
 		}
 		processed.insert(v);
 	}
 
-	if (!LEN(valid))
-		no();
-	cout << *valid.begin() << '\n';
+	for (int i = 1; i <= n; i++)
+		if (valid[i] == valid_checks) {
+			cout << i << '\n';
+			exit(0);
+		}
+	no();
 	
 	return 0;
 }

@@ -99,8 +99,10 @@ bool inter (line l1, line l2, pair<ld, ld> &out) {
 	T d = cross (l1.v, l2.v);
 	if (cmp (d) == 0) return false;
 	// out = (l2.v*l1.c - l1.v*l2.c) / d; // Require ld
-	out.x = (l2.v.x*l1.c - l1.v.x*l2.c) / d;
-	out.y = (l2.v.y*l1.c - l1.v.y*l2.c) / d;
+	// cerr << "    l1 -> " << l1.v.x << ' ' << l1.v.y << ", c = " << l1.c << '\n';
+	// cerr << "    l2 -> " << l2.v.x << ' ' << l2.v.y << ", c = " << l2.c << '\n';
+	out.x = (ld)(l2.v.x*(ld)l1.c - l1.v.x*(ld)l2.c) / d;
+	out.y = (ld)(l2.v.y*(ld)l1.c - l1.v.y*(ld)l2.c) / d;
 
 	return true;
 }
@@ -109,6 +111,16 @@ bool inter (line l1, line l2, pair<ld, ld> &out) {
 
 const int DBG = 0;
 
+const int MAXV = 2.2e8;
+pt _ans;
+int n;
+int DBG_total = 0;
+
+bool between_lines (pair<line, line> lin, pt a) {
+	return (lin.x.side(a) == 0 or lin.y.side(a) == 0 or
+				(lin.x.side(a) != lin.y.side(a)));
+}
+
 bool read_ans () {
 	string s;
 	cin >> s;
@@ -116,21 +128,35 @@ bool read_ans () {
 }
 
 bool qry (pt x) {
-	if (!DBG)
+	++DBG_total;
+	if (DBG < 2)
 		cout << "? 1 " << x.x << ' ' << x.y << endl;
-	else {
-		exit(0);
+	if (DBG) {
+		bool ret = (x.x == _ans.x and x.y == _ans.y);
+		if (DBG > 2)
+			cerr << "ret = " << ret << '\n';
+		return ret;
 	}
 	return read_ans();
 }
 
 bool qry (pt a, pt b, pt c) {
-	if (!DBG)
+	++DBG_total;
+	assert(a.x != b.x or a.y != b.y);
+	assert(a.x != c.x or a.y != c.y);
+	assert(b.x != c.x or b.y != c.y);
+	if (DBG < 2)
 		cout << "? 3 " 	<< a.x << ' ' << a.y << ' '
 						<< b.x << ' ' << b.y << ' '
 						<< c.x << ' ' << c.y << endl;
-	else {
-		exit(0);
+	if (DBG) {
+		line l3 = {b, c};
+		bool ret = between_lines({{a, b}, {a, c}}, _ans) and
+			(l3.side(_ans) == 0 or l3.side(_ans) == l3.side(a));
+
+		if (DBG > 2)
+			cerr << "ret = " << ret << '\n';
+		return ret;
 	}
 	return read_ans();
 }
@@ -138,39 +164,6 @@ bool qry (pt a, pt b, pt c) {
 void prt_ans (pt a) {
 	cout << "! " << a.x << ' ' << a.y << endl;
 	exit(0);
-}
-
-pii bin_search_diag (pt base_st, int l, int r) {
-	cerr << "bin_diag\n";
-	while (l+1 < r) {
-		int md = (l+r+1)/2;
-		if (qry (base_st, {l, l}, {md, md}))
-			r = md;
-		else
-			l = md+1;
-	}
-
-	return {l, r};
-}
-
-pii bin_search_side (pt base_st, int n, bool is_floor) {
-	cerr << "bin_side\n";
-	int l = 1, r = n;
-	while (l+1 < r) {
-		int md = (l+r+1)/2;
-		pt l_pt = {l, l};
-		pt md_pt = {md, md};
-		if (is_floor)
-			l_pt.x = n, md_pt.x = n;
-		else
-			l_pt.y = n, md_pt.y = n;
-		if (qry (base_st, l_pt, md_pt))
-			r = md;
-		else
-			l = md+1;
-	}
-
-	return {l, r};
 }
 
 vector<pair<ld, ld>> get_inters (pair<line, line> diag, pair<line, line> side) {
@@ -191,33 +184,39 @@ vector<pair<ld, ld>> get_inters (pair<line, line> diag, pair<line, line> side) {
 	return pts_inters;
 }
 
-bool between_lines (pair<line, line> diag, pt a) {
-	return ((diag.x.side(a) == 0 and diag.y.side(a) == 0) or
-							(diag.x.side(a) != diag.y.side(a)));
-}
-
 void solve (pair<line, line> diag, pair<line, line> side) {
 	ll x_mn = INF<ll>, x_mx = -INF<ll>;
 	ll y_mn = INF<ll>, y_mx = -INF<ll>;
 	for (pair<ld, ld> a : get_inters(diag, side)) {
-		x_mn = min(x_mn, (ll)(floor(a.x)+EPS));
+		if (DBG > 2)
+			cerr << fixed << "inter: " << a.x << ' ' << a.y << '\n';
+		x_mn = min(x_mn, (ll)(floor(a.x)-EPS));
 		x_mx = max(x_mx, (ll)(ceil(a.x)+EPS));
-		y_mn = min(y_mn, (ll)(floor(a.y)+EPS));
+		y_mn = min(y_mn, (ll)(floor(a.y)-EPS));
 		y_mx = max(y_mx, (ll)(ceil(a.y)+EPS));
+	}
+	if (DBG > 2) {
+		cerr << "x -> [" << x_mn << ", " << x_mx << "]\n";
+		cerr << "y -> [" << y_mn << ", " << y_mx << "]\n";
 	}
 	vector<pt> pt_check;
 	for (int i = x_mn; i <= x_mx; i++)
 		for (int j = y_mn; j <= y_mx; j++) {
 			pt a = {i, j};
-			if (between_lines(diag, a) and between_lines(side, a)) {
-				cerr << "a = " << a.x << ' ' << a.y << '\n';
+				// cerr << "a = " << a.x << ' ' << a.y << '\n';
+			if (a.x and a.y and a.x <= n and a.y <= n and between_lines(diag, a) and between_lines(side, a)) {
+				// cerr << "a = " << a.x << ' ' << a.y << '\n';
+				// cerr<< "  BETWEEN! OK!\n";
 				pt_check.push_back(a);
 			}
 		}
-	assert(LEN(pt_check) <= 6);
+	// cerr << "total_qry = " << DBG_total << '\n';
+	assert(DBG_total+LEN(pt_check) <= 60);
 	for (pt a : pt_check)
 		if (qry(a))
 			prt_ans(a);
+	// assert(false);
+	// cerr << "NO POINT!\n";
 }
 
 int main () {
@@ -225,35 +224,65 @@ int main () {
 	cin.tie(NULL);
 	cout.precision(10);
 	
-	int n;
-	cin >> n;
-	
-	if (n <= 3) {
-		for (int i = 1; i <= n; i++)
-			for (int j = 1; j <= n; j++)
-				if (qry({i, i}))
-					prt_ans({i, i});
+	int t = 1;
+	// cin >> t;
+	while (t--) {
+		DBG_total = 0;
+		cin >> n;
+		if (DBG)
+			cin >> _ans.x >> _ans.y;
+
+		pt fixed_left = {1, MAXV};
+		int l = 0, r = MAXV;
+		auto apply_left = [=] (int v) {
+			pt p = {1, 1};
+			p.x = min(p.x+v, (ll)MAXV);
+			v -= p.x-1;
+			p.y += v;
+			return p;
+		};
+		while (l < r-1)  {
+			int md = (l+r+1)/2;
+			if (qry(fixed_left, apply_left(l), apply_left(md)))
+				r = md;
+			else
+				l = md;
+		}
+		if (DBG > 2) {
+			cerr << "left_l -> (" << apply_left(l).x << ", " << apply_left(l).y << ")\n";
+			cerr << "left_r -> (" << apply_left(r).x << ", " << apply_left(r).y << ")\n";
+		}
+		line left_l1 = line({1, MAXV}, apply_left(l));
+		line left_l2 = line({1, MAXV}, apply_left(r));
+
+		pt fixed_right = {MAXV, MAXV};
+		auto apply_right = [=] (int v) {
+			pt p = {1, MAXV};
+			p.y = max(p.y-v, 1LL);
+			v -= MAXV-p.y;
+			p.x += v;
+			return p;
+		};
+		l = 0, r = 2*MAXV - 2;
+		while (l < r-1)  {
+			int md = (l+r+1)/2;
+			if (qry(fixed_right, apply_right(l), apply_right(md)))
+				r = md;
+			else
+				l = md;
+			// cerr << "(" << apply_right(l).x << ", " << apply_right(l).y << ") | ";
+			// cerr << "(" << apply_right(r).x << ", " << apply_right(r).y << ") |\n";
+		}
+		if (DBG > 2) {
+			cerr << "right_l -> (" << apply_right(l).x << ", " << apply_right(l).y << ")\n";
+			cerr << "right_r -> (" << apply_right(r).x << ", " << apply_right(r).y << ")\n";
+		}
+		line right_l1 = line(fixed_right, apply_right(l));
+		line right_l2 = line(fixed_right, apply_right(r));
+
+		solve({left_l1, left_l2}, {right_l1, right_l2});
 	}
-	// Ceil
-	else if (qry({1, 1}, {1, n}, {n, n})) {
-		pt base_st = {1, n};
-		pt base_st_side = {2, 1};
-		auto [l_diag, r_diag] = bin_search_diag(base_st, 1, n);
-		auto [l, r] = bin_search_side(base_st_side, n, 0);
-		line diag_l1 = line(base_st, {l_diag, l_diag});
-		line diag_l2 = line(base_st, {r_diag, r_diag});
-		line side_l1 = line(base_st_side, {1, l});
-		line side_l2 = line(base_st_side, {1, r});
-		solve({diag_l1, diag_l2}, {side_l1, side_l2});
-	}
-	// Floor
-	else {
-		pt base_st = {n, 1};
-		pt base_st_side = {1, 2};
-		auto [l_diag, r_diag] = bin_search_diag(base_st, 1, n);
-		auto [l, r] = bin_search_side(base_st_side, n, 1);
-		exit(0);
-	}
+
 
 	return 0;
 }

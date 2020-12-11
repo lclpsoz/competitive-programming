@@ -142,9 +142,6 @@ bool qry (pt x) {
 
 bool qry (pt a, pt b, pt c) {
 	++DBG_total;
-	assert(a.x != b.x or a.y != b.y);
-	assert(a.x != c.x or a.y != c.y);
-	assert(b.x != c.x or b.y != c.y);
 	if (DBG < 2)
 		cout << "? 3 " 	<< a.x << ' ' << a.y << ' '
 						<< b.x << ' ' << b.y << ' '
@@ -188,35 +185,24 @@ void solve (pair<line, line> diag, pair<line, line> side) {
 	ll x_mn = INF<ll>, x_mx = -INF<ll>;
 	ll y_mn = INF<ll>, y_mx = -INF<ll>;
 	for (pair<ld, ld> a : get_inters(diag, side)) {
-		if (DBG > 2)
-			cerr << fixed << "inter: " << a.x << ' ' << a.y << '\n';
 		x_mn = min(x_mn, (ll)(floor(a.x)-EPS));
 		x_mx = max(x_mx, (ll)(ceil(a.x)+EPS));
 		y_mn = min(y_mn, (ll)(floor(a.y)-EPS));
 		y_mx = max(y_mx, (ll)(ceil(a.y)+EPS));
-	}
-	if (DBG > 2) {
-		cerr << "x -> [" << x_mn << ", " << x_mx << "]\n";
-		cerr << "y -> [" << y_mn << ", " << y_mx << "]\n";
 	}
 	vector<pt> pt_check;
 	for (int i = x_mn; i <= x_mx; i++)
 		for (int j = y_mn; j <= y_mx; j++) {
 			pt a = {i, j};
 				// cerr << "a = " << a.x << ' ' << a.y << '\n';
-			if (a.x and a.y and a.x <= n and a.y <= n and between_lines(diag, a) and between_lines(side, a)) {
-				// cerr << "a = " << a.x << ' ' << a.y << '\n';
-				// cerr<< "  BETWEEN! OK!\n";
+			if (a.x and a.y and a.x <= n and a.y <= n and between_lines(diag, a) and between_lines(side, a))
 				pt_check.push_back(a);
-			}
 		}
-	// cerr << "total_qry = " << DBG_total << '\n';
+
 	assert(DBG_total+LEN(pt_check) <= 60);
 	for (pt a : pt_check)
 		if (qry(a))
 			prt_ans(a);
-	// assert(false);
-	// cerr << "NO POINT!\n";
 }
 
 int main () {
@@ -224,64 +210,57 @@ int main () {
 	cin.tie(NULL);
 	cout.precision(10);
 	
-	int t = 1;
-	// cin >> t;
-	while (t--) {
-		DBG_total = 0;
-		cin >> n;
-		if (DBG)
-			cin >> _ans.x >> _ans.y;
+	cin >> n;
+	if (DBG)
+		cin >> _ans.x >> _ans.y;
 
-		pt fixed_left = {1, MAXV};
-		int l = 0, r = MAXV;
-		auto apply_left = [=] (int v) {
-			pt p = {1, 1};
-			p.x = min(p.x+v, (ll)MAXV);
-			v -= p.x-1;
-			p.y += v;
-			return p;
-		};
-		while (l < r-1)  {
-			int md = (l+r+1)/2;
-			if (qry(fixed_left, apply_left(l), apply_left(md)))
-				r = md;
-			else
-				l = md;
-		}
-		if (DBG > 2) {
-			cerr << "left_l -> (" << apply_left(l).x << ", " << apply_left(l).y << ")\n";
-			cerr << "left_r -> (" << apply_left(r).x << ", " << apply_left(r).y << ")\n";
-		}
-		line left_l1 = line({1, MAXV}, apply_left(l));
-		line left_l2 = line({1, MAXV}, apply_left(r));
-
-		pt fixed_right = {MAXV, MAXV};
-		auto apply_right = [=] (int v) {
-			pt p = {1, MAXV};
-			p.y = max(p.y-v, 1LL);
-			v -= MAXV-p.y;
-			p.x += v;
-			return p;
-		};
-		l = 0, r = 2*MAXV - 2;
-		while (l < r-1)  {
-			int md = (l+r+1)/2;
-			if (qry(fixed_right, apply_right(l), apply_right(md)))
-				r = md;
-			else
-				l = md;
-			// cerr << "(" << apply_right(l).x << ", " << apply_right(l).y << ") | ";
-			// cerr << "(" << apply_right(r).x << ", " << apply_right(r).y << ") |\n";
-		}
-		if (DBG > 2) {
-			cerr << "right_l -> (" << apply_right(l).x << ", " << apply_right(l).y << ")\n";
-			cerr << "right_r -> (" << apply_right(r).x << ", " << apply_right(r).y << ")\n";
-		}
-		line right_l1 = line(fixed_right, apply_right(l));
-		line right_l2 = line(fixed_right, apply_right(r));
-
-		solve({left_l1, left_l2}, {right_l1, right_l2});
+	pt fixed_left = {1, MAXV};
+	int l = 0, r = MAXV;
+	auto apply_left = [=] (int v) {
+		pt p = {1, 1};
+		p.x = min(p.x+v, (ll)MAXV);
+		v -= p.x-1;
+		p.y += v;
+		return p;
+	};
+	while (l < r-1)  {
+		int md = (l+r+1)/2;
+		if (qry(fixed_left, apply_left(l), apply_left(md)))
+			r = md;
+		else
+			l = md;
 	}
+	if (DBG > 2) {
+		cerr << "left_l -> (" << apply_left(l).x << ", " << apply_left(l).y << ")\n";
+		cerr << "left_r -> (" << apply_left(r).x << ", " << apply_left(r).y << ")\n";
+	}
+	line left_l1 = line({1, MAXV}, apply_left(l));
+	line left_l2 = line({1, MAXV}, apply_left(r));
+
+	pt fixed_right = {MAXV, MAXV};
+	auto apply_right = [=] (int v) {
+		pt p = {1, MAXV};
+		p.y = max(p.y-v, 1LL);
+		v -= MAXV-p.y;
+		p.x += v;
+		return p;
+	};
+	l = 0, r = 2*MAXV - 2;
+	while (l < r-1)  {
+		int md = (l+r+1)/2;
+		if (qry(fixed_right, apply_right(l), apply_right(md)))
+			r = md;
+		else
+			l = md;
+	}
+	if (DBG > 2) {
+		cerr << "right_l -> (" << apply_right(l).x << ", " << apply_right(l).y << ")\n";
+		cerr << "right_r -> (" << apply_right(r).x << ", " << apply_right(r).y << ")\n";
+	}
+	line right_l1 = line(fixed_right, apply_right(l));
+	line right_l2 = line(fixed_right, apply_right(r));
+
+	solve({left_l1, left_l2}, {right_l1, right_l2});
 
 
 	return 0;

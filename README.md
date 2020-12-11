@@ -40,13 +40,35 @@ Ex: 10315.cpp
 - A number and a letter, it's from codeforces.
 Ex: 279C.cpp
 
-### TP/
+### LIB/
 
 Code templates for competition.
 
 Other folders not described above that can appear eventually are for recent contests.
 
-### TODO
+#### How to configure cf parse
+
+g++ a.cpp -Wall -Wextra -pedantic -Wshadow -Wformat=2 -Wfloat-equal -Wconversion -Wlogical-op -Wcast-qual -Wcast-align -Wsign-conversion         -fsanitize=address -O2 -o a -std=c++17
+
+1. 0) login
+2. 1) add a template
+   1. Language code for c++17: 54
+   2. Input template absolute path
+   3. Leave suffix empty
+   4. cpp as template alias
+   5. Before script: g++ $%full%$ -Wall -Wextra -pedantic -Wshadow -Wformat=2 -Wfloat-equal -Wconversion -Wlogical-op -Wcast-qual -Wcast-align -Wsign-conversion -fsanitize=address -O2 -o $%file%$ -std=c++17
+   6. After script: ./$%file%$
+   7. Leave empty after script
+3. 7) set folders' name
+   1. Root path: CF
+   2. contest path: .
+   3. gym path: .
+   4. group path: .
+   5. acmsguru path: .
+
+- Activate option 4) run "cf gen" after "cf parse"
+
+#### TODO
 
 - Unify all CF contests names.
 - Clean all unused files copied from one of the templates.

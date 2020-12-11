@@ -19,7 +19,7 @@ inline int cmp(ld x, ld y = 0, ld tol = EPS) {
 	return (x <= y + tol) ? (x + tol < y) ? -1 : 0 : 1;
 }
 
-const int MOD = 1;
+const int MOD = 1e9+7;
 inline int mod(ll x, int m = MOD) {
 	return (int)(((x%m) + m)%m);
 }
@@ -29,12 +29,26 @@ using ordered_set = __gnu_pbds::tree<T, M, less<T>, __gnu_pbds::rb_tree_tag, __g
 
 ////////////////////////// Solution starts below. //////////////////////////////
 
+const int N = 5e6 + 10;
 
+int dp[N];
 
 int main () {
-	// ios_base::sync_with_stdio(false);
-    // cin.tie(NULL);
-    // cout.precision(10);
+	int a, k;
+	cin >> a >> k;
+
+	dp[1] = 0;
+	int pot = a;
+	int ans = 0;
+	for(int sz = 1; sz <= k; sz++) {
+		dp[sz] = (pot - dp[sz])%MOD;
+		ans = (ans + dp[sz])%MOD;
+		pot = (pot*1LL*a)%MOD;
+		for(int i = sz+sz; i < N; i+=sz)
+			dp[i] = (dp[i]+dp[sz])%MOD;
+	}
+	cout << mod(ans) << '\n';
+
 
 	return 0;
 }

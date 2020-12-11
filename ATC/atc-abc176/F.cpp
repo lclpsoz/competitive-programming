@@ -29,12 +29,43 @@ using ordered_set = __gnu_pbds::tree<T, M, less<T>, __gnu_pbds::rb_tree_tag, __g
 
 ////////////////////////// Solution starts below. //////////////////////////////
 
+const int DBG = 0;
 
+int n;
+vi vec;
+map<int, int> dp[2010][2010];
+
+int solve(int pos, int x, int y) {
+	if(pos == n) return 0;
+	// cout << "pos = " << pos << ", x = " << x << ", y = " << y << '\n';
+	int p_now = 3*pos;
+	if(dp[pos][x].count(y)) return dp[pos][x][y];
+	int &ret = dp[pos][x][y];
+	if(pos < n-1) {
+		vi now = {x, y, vec[p_now+2], vec[p_now+3], vec[p_now+4]};
+		ret = solve(pos+1, x, y) + (now[2] == now[3] and now[3] == now[4]);
+		for(int i = 0; i < 5; i++)
+			for(int j = i+1; j < 5; j++)
+				ret = max(ret, solve(pos+1, now[i], now[j]));
+	}
+	else
+		ret = x == y and y == vec[p_now+2];
+	return ret;
+}
 
 int main () {
-	// ios_base::sync_with_stdio(false);
-    // cin.tie(NULL);
-    // cout.precision(10);
+	ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+    cout.precision(10);
+
+	cin >> n;
+	for(int i = 0; i < 3*n; i++) {
+		int x;
+		cin >> x;
+		vec.push_back(x);
+	}
+
+	cout << solve(0, vec[0], vec[1]) << '\n';
 
 	return 0;
 }

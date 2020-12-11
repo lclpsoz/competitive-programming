@@ -42,7 +42,7 @@ bool nxt(vi &mask, int base) {
 	return true;
 }
 
-bool check(int n, int m, vpii carps, vi &mask, vi &order) {
+bool check(int n, int m, vpii carps, vi &mask, vi &order, int &cnt) {
 	int area = 0;
 	vi heights(n);
 	// if(LEN(order) != 3) return false;
@@ -64,15 +64,19 @@ bool check(int n, int m, vpii carps, vi &mask, vi &order) {
 		if(DBG)
 			cout << "carp: " << w << ", " << h << '\n';
 		int p = 0;
-		for(int i = 0; i < n; i++)
+		for(int i = 0; i < n; i++) {
+			cnt++;
 			if(heights[i] < heights[p]) p = i;
+		}
 		int mini = heights[p];
 		if(p+w-1 >= n) return false;
-		for(int i = p; i < p+w; i++)
+		for(int i = p; i < p+w; i++) {
+			cnt++;
 			if(heights[i] != mini)
 				return false;
 			else
 				heights[i]+=h;
+		}
 		if(DBG) {
 			cout << "\t\theights: ";
 			for(int i = 0; i < n; i++)
@@ -137,12 +141,11 @@ int main () {
 			if(mask[i])
 				order.push_back(i);
 		do {
-			if(check(n, m, carps, mask, order))
+			if(check(n, m, carps, mask, order, cnt))
 				yes();
-			++cnt;
 		} while(next_permutation(ALL(order)));
 	}while(nxt(mask, 3));
-	// cout << "cnt = " << cnt << '\n';
+	cout << "cnt = " << cnt << '\n';
 	cout << "no\n";
 
 	return 0;

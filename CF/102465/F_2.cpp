@@ -60,8 +60,10 @@ int main () {
 	}
 
 	ll ans = 1e19;
+	set<pii> used;
 	for(auto &[center, center_g] : all_points) {
 		vector<pair<pii, int>> points;
+		used.insert(center);
 		for(auto &point : all_points)
 			if(point.x != center)
 				points.push_back({{point.x.x-center.x, point.x.y-center.y}, point.y});
@@ -70,8 +72,7 @@ int main () {
 			if(quarter(lhs.x) == quarter(rhs.x)) return cross(lhs.x, rhs.x) > 0;
 			return quarter(lhs.x) < quarter(rhs.x);
 		});
-
-		int m = n-1;
+		int m = LEN(points);
 		int l = 0, r = 0;
 		ll sum_now = 0;
 		while(l < 2*m and r < 2*m) {

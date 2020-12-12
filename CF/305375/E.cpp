@@ -34,10 +34,9 @@ using ordered_set = __gnu_pbds::tree<T, M, less<T>, __gnu_pbds::rb_tree_tag, __g
 
 const int N = 62;
 ll basis[N];
-vi ans;
 int sz;
 
-void insertVector(ll mask, int n) {
+void insertVector(ll mask, int n, vector<ll> &ans) {
 	ll num = mask;
 	for (int i = 0; i < n; i++) {
 		if ((mask & 1 << i) == 0) continue; // continue if i != f(mask)
@@ -70,6 +69,45 @@ ll nxt_num (ll v) {
 	return v;
 }
 
+vector<ll> solve_brute (int n, int k) {
+	vector<ll> ans;
+	sz = 0;
+	
+
+	for(int i = 0; i < n; i++)
+		basis[i] = 0;
+
+	ll v = (1LL << k) - 1;
+	while(sz < n)
+	{
+		if(64 - __builtin_clzll(v) > n) break;
+		insertVector(v, n, ans);
+		v = nxt_num(v);
+	}
+
+	if(sz < n) ans = {-1};
+	return ans;
+}
+
+vector<ll> solve (int n, int k) {
+	if (n > 1 and (k == n or k%2 == 0))
+		return {-1LL};
+	vector<ll> ret;
+	if (k == 1) {
+		for (int i = 0; i < n; i++)
+			ret.push_back(1LL<<i);
+	}
+	else {
+		ll v = (1LL<<(k+1))-1;
+		for (int j = 0; j <= k; ++j)
+			ret.push_back(v^(1LL<<j));
+		for (int i = k+1; i < n; i++)
+			ret.push_back((((1LL<<(k-1))-1))|(1LL<<i));
+	}
+	sort(ALL(ret));
+	return ret;
+}
+
 int main () {
 	// freopen("FILE_NAME_INPUT.EXTENSION", "r", stdin);
 	// freopen("FILE_NAME_OUTPUT.EXTENSION", "w", stdout);
@@ -77,27 +115,26 @@ int main () {
 	cin.tie(NULL);
 	cout.precision(10);
 
+	// for (int n = 1; n <= 20; n++)
+	// 	for (int k = 1; k <= n; k++) {
+	// 		vector<ll> ans = solve (n, k);
+	// 		if (n > 1 and (n == k or k%2 == 0)) {
+	// 			assert(ans[0] == -1);
+	// 			continue;
+	// 		}
+	// 		cerr << n << ' ' << k << ":\n";
+	// 		for (int v : ans)
+	// 			cerr << v << ":\t\t" << bitset<30>(v) << '\n';
+			
+	// 		cerr << '\n';
+	// 	}
+
 	int t; cin >> t;
 	while(t--)
 	{
-		ans.clear();
-		sz = 0;
-		
 		int n, k;
 		cin >> n >> k;
-
-		for(int i = 0; i < n; i++)
-			basis[i] = 0;
-
-		ll v = (1LL << k) - 1;
-		while(sz < n)
-		{
-			if(64 - __builtin_clzll(v) > n) break;
-			insertVector(v, n);
-			v = nxt_num(v);
-		}
-
-		if(sz < n) ans = {-1};
+		vector<ll> ans = solve (n, k);
 		for(int i = 0; i < LEN(ans); i++)
 			cout << ans[i] << " \n"[i == LEN(ans) - 1];
 	}

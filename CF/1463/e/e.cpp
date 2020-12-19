@@ -85,8 +85,7 @@ void top_sort (int v, int p, vi &color, vi &order, graph &g) {
 		no();
 	color[v] = 1;
 	for (int u : g.adj[v])
-		if (u != p)
-			top_sort(u, v, color, order, g);
+		top_sort(u, v, color, order, g);
 	color[v] = 2;
 	order.push_back(v);
 }
@@ -198,6 +197,9 @@ int main () {
 		for (int v : comp_to_v[v_comp])
 			prt.push_back(v);
 	
+	if (LEN(prt) != n)
+		no();
+
 	for (int i = 0; i < LEN(prt); i++)
 		cout << prt[i] << " \n"[i == LEN(prt)-1];
 

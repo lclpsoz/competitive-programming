@@ -30,14 +30,6 @@ using ordered_set = __gnu_pbds::tree<T, M, less<T>, __gnu_pbds::rb_tree_tag, __g
 ////////////////////////// Solution starts below. //////////////////////////////
 
 int t, n;
-vector<int> vec;
-vector<pair<pii, int>> ans;
-
-bool check() {
-	for(int i = 1; i <= n; i++)
-		if(vec[i] >= i)	return true;
-	return false;
-}
 
 int main () {
 	ios_base::sync_with_stdio(false);
@@ -47,88 +39,50 @@ int main () {
 	cin >> t;
 	while(t--) {
 		cin >> n;
-		int total = 0;
-		int bef = -1;
-		bool equal = true;
-		int count_mov = 0;
-		vec.clear();
-		vec.push_back(-1);
-		for(int i = 0; i < n; i++) {
-			int x;
-			cin >> x;
-			total += x;
-			vec.push_back(x);
-			count_mov += (x >= i+1);
-			if(bef == -1)
-				bef = x;
-			else if(bef != x)
-				equal = false;
+		ll total = 0;
+		vector<ll> vec(n);
+		for (ll &v : vec) {
+			cin >> v;
+			total += v;
 		}
-		if(total%n or (!equal and count_mov == 0))
+		if (total%n)
 			cout << "-1\n";
-		else if(equal)
-			cout << "0\n";
 		else {
-			int target = total/n;
-			for(int i = 2; i <= n; i++) {
-				if(vec[i] >= i) {
-					int x = vec[i]/i;
-					ans.push_back({{i, 1}, x});
-					vec[i] -= x*i;
-					vec[1] += x*i;
-				}
-			}
-			if(!check()) {
-				cout <<"-1\n";
-				continue;
-			}
-			// for(int i = 1; i <= n; i++)
-			// 	cout << i << ": " << vec[i] << '\n';
-			for(int j = 0; j < 1; j++) {
-				for(int i = 2; i <= n; i++)
-					if(vec[i] and vec[1]+vec[i] >= i) {
-						ans.push_back({{1, i}, i-vec[i]});
-						ans.push_back({{i, 1}, 1});
-						vec[1] += vec[i];
-						vec[i] = 0;
-					}
-				// cout << "vals = ";
-				// for(int i = 1; i <= n; i++)
-				// 	cout << vec[i] << ' ';
-				// cout << '\n';
+			int single_val = total/n;
+			vector<vi> operations;
+			auto ins_op = [&] (int a, int b, int val) {
+				operations.push_back({a, b, val});
+				vec[a-1] -= val*a;
+				vec[b-1] += val*a;
+			};
+			for (int i = 2; i <= n; i++) {
+				int complement = (i - (vec[i-1]%i))%i;
+				if (complement)
+					ins_op(1, i, complement);
 
-				if(!check())
-					break;
+				if (vec[i-1])
+					ins_op(i, 1, vec[i-1]/i);
 			}
-			// for(int i = 1; i <= n; i++)
-			// 	cout << i << ": " << vec[i] << '\n';
-			if(!check()) {
+			for (int j = 2; j <= n; j++) {
+				int i = 1;
+				int x = single_val - vec[j-1];
+				if (x)
+					ins_op(1, j, x);
+			}
+			bool ans = true;
+			for (ll v : vec)
+				if (v != single_val)
+					ans = false;
+			if (ans) {
+				cout << LEN(operations) << '\n';
+				for (vi op : operations)
+					for (int i = 0; i < 3; i++)
+						cout << op[i] << " \n"[i==2];
+			}
+			else {
 				cout << "-1\n";
-				continue;
 			}
-			bool ok = true;
-			for(int i = 2; ok and i <= n; i++) {
-				// cout << i << ' ' << vec[i] << '\n';
-				if(vec[i] > target) {
-					ok=false;
-				} else if(vec[i] < target) {
-					ans.push_back({{1, i}, target-vec[i]});
-					vec[1]-=target-vec[i];
-					vec[i] = target;
-				}
-			}
-			if(!ok or vec[1] != target or LEN(ans) >= 3*n) {
-				cout << "-1\n";
-			} else {
-				cout << LEN(ans) << '\n';
-				for(auto p : ans)
-					cout << p.x.x << ' ' << p.x.y << ' ' << p.y << '\n';
-				// for(int i = 1; i <= n; i++)
-				// 	cout << i << ": " << vec[i] << '\n';
-			}
-			ans.clear();
 		}
-
 	}
 
 	return 0;

@@ -30,9 +30,9 @@
 *.ipynb*
 *.zip
 
-# Ignores all TPs files, except folder TP/
+# Ignores all TPs files, except folder LIB/
 *tp*.cpp*
-!TP/*
+!LIB/*
 
 # Ignores all Makefiles, except from root folder
 *Makefile*

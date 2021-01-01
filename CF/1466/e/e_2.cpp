@@ -24,7 +24,10 @@ inline int fcmp(ld x, ld y = 0, ld tol = EPS) {
 }
 
 inline int mod(ll x, int m = MOD) {
-	return x%m;
+	int ret = x%m;
+	if (ret < 0)
+		ret += m;
+	return ret;
 }
 
 template<typename T, typename M = __gnu_pbds::null_type>

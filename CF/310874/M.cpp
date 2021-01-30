@@ -35,28 +35,20 @@ using ordered_set = __gnu_pbds::tree<T, M, less<T>, __gnu_pbds::rb_tree_tag, __g
 
 ////////////////////////// Solution starts below. //////////////////////////////
 
-const int block_size = 800;
-
-struct query {
-	int l, r;
-	int id;
-	bool operator<(query other) const {
-        return make_pair(l / block_size, r) < make_pair(other.l / block_size, other.r);
-    }
-};
-
 const int N = 5e5 + 10;
-int cnt[N], v[N], n, q, ans, mp[N], anss[N];
 
-inline void add(int p)
-{
-	if(++cnt[v[p]] > 1)
-		ans ^= mp[v[p]];
+int bit[N];
+
+void add_xor (int p, int v) {
+	for (int i = p; i < N; i+=i&-i)
+		bit[i] ^= v;
 }
-inline void del(int p)
-{
-	if(--cnt[v[p]] > 0)
-		ans ^= mp[v[p]];
+
+int sum_xor (int p) {
+	int ret = 0;
+	for (int i = p; i; i-=i&-i)
+		ret ^= bit[i];
+	return ret;
 }
 
 int main () {
@@ -66,57 +58,30 @@ int main () {
 	cin.tie(NULL);
 	cout.precision(10);
 
-	while(cin >> n >> q)
-	{
-		for (int i = 0; i < n; i++) {
-			cin >> v[i];
-			mp[i] = v[i];
-		}
+	int n, q;
+	cin >> n >> q;
+	vi vec(n+1);
+	for (int i = 1; i <= n; i++)
+		cin >> vec[i];
 
-		sort(mp, mp + n);
-		int sz = unique(mp, mp + n) - mp;
-
-		for (int i = 0; i < n; i++)
-			v[i] = lower_bound(mp, mp + sz, v[i]) - mp;
-
-		vector<query> queries(q);
-		for (int i = 0; i < q; i++) {
-			int l, r;
-			cin >> l >> r;
-			queries[i] = {l, r, i};
-		}
-		sort(queries.begin(), queries.end());
-
-		int cur_l = 0;
-		int cur_r = -1;
-		for (int i = 0; i < q; i++) {
-			auto [l, r, id] = queries[i];
-			l--, r--;
-			while (cur_l > l) {
-				cur_l--;
-				add(cur_l);
-			}
-			while (cur_r < r) {
-				cur_r++;
-				add(cur_r);
-			}
-			while (cur_l < l) {
-				del(cur_l);
-				cur_l++;
-			}
-			while (cur_r > r) {
-				del(cur_r);
-				cur_r--;
-			}
-			anss[id] = ans;
-		}
-
-		while(cur_l <= cur_r) del(cur_l++);
-
-		for (int i = 0; i < q; i++)
-			cout << anss[i] << '\n';
+	vector<vpii> queries(n+1);
+	for (int i = 0; i < q; i++) {
+		int l, r;
+		cin >> l >> r;
+		queries[r].push_back({i, l});
 	}
 
+	map<int, int> lst_val;
+	vi ans(q);
+	for (int i = 1; i <= n; i++) {
+		if (lst_val.count(vec[i]))
+			add_xor(lst_val[vec[i]], vec[i]);
+		lst_val[vec[i]] = i;
+		for (auto [pos, l] : queries[i])
+			ans[pos] = sum_xor(i) ^ sum_xor(l-1);
+	}
+	for (int v : ans)
+		cout << v << '\n';
 
 	return 0;
 }

@@ -166,7 +166,6 @@ int main () {
 			cin >> u >> v >> w;
 			// cerr << "try: " << u << ' ' << v << ' ' << w << '\n';
 			g.add_edge(u, v, w);
-			g.add_edge(v, u, w);
 			// cerr << "  add_edge: " << u << ' ' << v << ' ' << w << '\n';
 		}
 		int ans =  g.max_flow(1, n);

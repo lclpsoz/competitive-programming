@@ -85,12 +85,20 @@ int main () {
 			}
 		}
 
+        assert(LEN(portals) == n_players);
+
 		if (LEN(portals) < n_players)
 			cout << "-1\n";
 		else {
-			vector<vector<vi>> dists;
-			for (auto [x, y] : players)
-				dists.push_back(min_dists(n, x, y, mat));
+			vector<vi> dists(LEN(players), vi(LEN(portals)));
+			for (int i = 0; i < LEN(players); i++) {
+				auto [x, y] = players[i];
+				vector<vi> dist = min_dists(n, x, y, mat);
+				for (int j = 0; j < LEN(portals); j++) {
+					auto [x, y] = portals[j];
+					dists[i][j] = dist[x][y];
+				}
+			}
 			
 			vi perm;
 			for (int i = 0; i < LEN(portals); i++)
@@ -98,11 +106,8 @@ int main () {
 			int ans = INF<int>;
 			do {
 				int max_dist = -1;
-				for (int i = 0; i < n_players; i++) {
-					int id_portal = perm[i];
-					auto [x, y] = portals[id_portal];
-					max_dist = max(max_dist, dists[i][x][y]);
-				}
+				for (int i = 0; i < n_players; i++)
+					max_dist = max(max_dist, dists[i][perm[i]]);
 				ans = min(ans, max_dist);
 			} while (next_permutation(ALL(perm)));
 			if (ans == INF<int>)

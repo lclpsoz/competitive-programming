@@ -1,0 +1,95 @@
+#include "bits/stdc++.h"
+#include "ext/pb_ds/tree_policy.hpp"
+#include "ext/pb_ds/assoc_container.hpp"
+using namespace std;
+////////////// Prewritten code follows. Look down for solution. ////////////////
+#define x first
+#define y second
+#define LEN(x) ((int)(x).size())
+#define ALL(x) x.begin(), x.end()
+using ll = long long;
+using llu = long long unsigned;
+using ld = long double;
+using pii = pair<int, int>;
+using vi = vector<int>;
+using vpii = vector<pii>;
+
+template<typename T>
+const T INF = (is_same<T, int>::value ? 1e9 : 1e18);
+const ld EPS = 1e-9;
+const int MOD = 1;
+
+inline int fcmp (ld x, ld y = 0, ld tol = EPS) {
+	return (x <= y + tol) ? (x + tol < y) ? -1 : 0 : 1;
+}
+
+inline int mod (ll x, int m = MOD) {
+	int ret = (int)x%m;
+	if (ret < 0)
+		ret += m;
+	return ret;
+}
+
+template<typename T, typename M = __gnu_pbds::null_type>
+using ordered_set = __gnu_pbds::tree<T, M, less<T>, __gnu_pbds::rb_tree_tag, __gnu_pbds::tree_order_statistics_node_update>;
+
+////////////////////////// Solution starts below. //////////////////////////////
+
+int base = 11;
+
+// ll basic_hash (string &s) {
+// 	ll base_now = 1;
+// 	ll ret = 0;
+// 	for (char c : s) {
+// 		int digit = c-'0'+1;
+// 		ret += digit * base_now;
+
+// 		base_now *= base;
+// 	}
+// 	return ret;
+// }
+
+int main () {
+	// freopen("FILE_NAME_INPUT.EXTENSION", "r", stdin);
+	// freopen("FILE_NAME_OUTPUT.EXTENSION", "w", stdout);
+	ios_base::sync_with_stdio(false);
+	cin.tie(NULL);
+	cout.precision(10);
+
+	int t;
+	cin >> t;
+	while (t--) {
+		int n;
+		cin >> n;
+		vector<string> vec_str(n);
+		for (string &x : vec_str)
+			cin >> x;
+		sort(ALL(vec_str), [](string &lft, string &rht) {
+			if (LEN(lft) != LEN(rht)) return LEN(lft) < LEN(rht);
+			return lft < rht;
+		});
+		bool ans = true;
+		set<ll> st;
+		for (string &x : vec_str) {
+			// cerr << "x = " << x << '\n';
+			ll val = 0;
+			ll base_now = 1;
+			for (char c : x) {
+				int digit = c-'0'+1;
+				val += digit * base_now;
+				// cerr << "  val = " << val << '\n';
+				if (st.count(val)) {
+					ans = false;
+					break;
+				}
+				base_now *= base;
+			}
+			st.insert(val);
+			if (!ans)
+				break;
+		}
+		cout << (ans ? "YES" : "NO") << '\n';
+	}
+
+	return 0;
+}

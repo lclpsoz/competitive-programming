@@ -35,82 +35,11 @@ using ordered_set = __gnu_pbds::tree<T, M, less<T>, __gnu_pbds::rb_tree_tag, __g
 
 ////////////////////////// Solution starts below. //////////////////////////////
 
-using hash_t = pair<int, int>;
-const hash_t MODS = {1000000007, 982451653};
-hash_t BASE = {313, 541};
-vector<hash_t> _pow = {hash_t(1, 1)};
+vector<string> comp;
 
-void gen_base()
-{
-    auto seed = std::chrono::high_resolution_clock::now().time_since_epoch().count();
-    std::mt19937 mt_rand(seed);
-    int base1 = std::uniform_int_distribution<int>(300, MODS.first - 4)(mt_rand) | 1;
-    int base2 = std::uniform_int_distribution<int>(300, MODS.second - 4)(mt_rand) | 1;
-    if(base1 == base2)
-        base2 += 2;
-    BASE = {base1, base2};
+int get_id (string &s) {
+	return lower_bound(ALL(comp), s) - comp.begin();
 }
-
-inline hash_t operator * (const hash_t& a, const hash_t& b)
-{
-    return {int((a.first * 1LL * b.first) % MODS.first), int((a.second * 1LL * b.second) % MODS.second)};
-}
-inline hash_t operator * (const hash_t& a, const int b)
-{
-    return {int((a.first * 1LL * b) % MODS.first), int((a.second * 1LL * b) % MODS.second)};
-}
-inline hash_t operator + (const hash_t& a, const hash_t& b)
-{
-    return {(a.first + b.first) % MODS.first, (a.second + b.second) % MODS.second};
-}
-inline hash_t operator - (const hash_t& a, const hash_t& b)
-{
-    return {(a.first - b.first + MODS.first) % MODS.first, (a.second - b.second + MODS.second) % MODS.second};
-}
-
-struct shash
-{
-    int n;
-    vector<hash_t> val;
-
-    shash(const shash& o)
-    {
-        n = o.n;
-        val = o.val;
-    }
-
-    shash(const string& _s = "")
-    {
-        n = 0;
-        val = {hash_t(0, 0)};
-        for(char c : _s)
-            push_back(c);
-    }
-
-    void push_back(char c)
-    {
-        n++;
-        while(LEN(_pow) < n)
-            _pow.emplace_back(_pow.back() * BASE);
-        val.emplace_back(val.back() + _pow[n - 1] * c);
-    }
-
-    void pop_back()
-    {
-        n--;
-        val.pop_back();
-    }
-
-    hash_t substr(int p, int sz, int diff)
-    {
-        return (val[p + sz] - val[p]) * _pow[diff];
-    }
-
-    int size()
-    {
-        return n;
-    }
-};
 
 int main () {
 	// freopen("input.txt", "r", stdin);
@@ -118,84 +47,94 @@ int main () {
 	ios_base::sync_with_stdio(false);
 	cin.tie(NULL);
 	cout.precision(10);
-	
-	gen_base();
 
-	int n; 
-	while(cin >> n)
-	{
-		vector<string> vs(n);
-		vector<hash_t> hs(n);
-		map<hash_t, int> mp;
-		vector<vector<char>> cc(10);
-		for(int i = 0; i < n; i++)
-		{
-			cin >> vs[i];
-			hs[i] = shash(vs[i]).substr(0, LEN(vs[i]), 0);
-			mp[hs[i]] = i;
-			for(int j = 0; j < LEN(vs[i]); j++)
-				cc[j].emplace_back(vs[i][j]);
+	int n;
+	cin >> n;
+	string st, en;
+	set<string> base;
+	for (int i = 1; i <= n; i++) {
+		string s;
+		cin >> s;
+		base.insert(s);
+		if (i == 1) st = s;
+		else if (i == n) en = s;
+		comp.push_back(s);
+		string ax = s;
+		for (int j = 0; j < LEN(s); j++) {
+			char c = ax[j];
+			ax[j] = '#';
+			comp.push_back(ax);
+			ax[j] = c;
 		}
+	}
+	sort(ALL(comp));
+	comp.resize(unique(ALL(comp)) - comp.begin());
+	vector<vi> mp(LEN(comp));	
 
-		for(int j = 0; j < LEN(vs[0]); j++)
-		{
-			sort(ALL(cc[j]));
-			cc[j].resize(int(unique(ALL(cc[j])) - cc[j].begin()));
-		}
-
-		vector<int> q;
-		vi par(n, -1), dist(n, -1);
-		q.emplace_back(0);
-		dist[0] = 0;
-
-		bool ok = false;
-		for(int i = 0; i < LEN(q) && !ok; i++)
-		{
-			int id = q[i];
-			hash_t hnow = hs[id];
-
-			for(int p = 0; p < LEN(vs[id]) && !ok; p++)
-				for(char c : cc[p])
-					if(c != vs[id][p])
-					{
-						// cout << "before: " << hnow.first << " -> ";
-						hnow = hnow - _pow[p] * vs[id][p];
-						hnow = hnow + _pow[p] * c;
-						if(mp.count(hnow))
-						{
-							int id2 = mp[hnow];
-							if(dist[id2] == -1)
-							{
-								// cout << vs[id] << " -> " << vs[id2] << endl;
-								par[id2] = id;
-								dist[id2] = dist[id] + 1;
-								q.emplace_back(id2);
-
-								if(id2 == n - 1)
-									ok = true;
-							}
-						}
-						hnow = hnow - _pow[p] * c;
-						hnow = hnow + _pow[p] * vs[id][p];
-						// cout << "after: " << hnow.first << endl;
-					}
-		}
-
-		if(!ok)
-			cout << "FAIL\n";
-		else
-		{
-			int i = n - 1;
-			cout << dist[i] + 1 << endl;
-			vector<int> ans;
-			while(i >= 0)
-			{
-				ans.emplace_back(i);
-				i = par[i];
+	for (string s : base) {
+		// if (!s.count('#')) {
+			// cerr << "s = " << s << '\n';
+			int id_base = get_id(s);
+			for (int j = 0; j < LEN(s); j++) {
+				char c = s[j];
+				s[j] = '#';
+				int id_ax = get_id(s);
+				mp[id_ax].push_back(id_base);
+				// cerr << "  ax = " << ax << ", s = " << s << '\n';
+				s[j] = c;
 			}
-			reverse(ALL(ans));
-			for(int t : ans) cout << vs[t] << '\n';
+		// }
+	}
+
+
+	//----- BFS
+	vi bfs;
+	vi bef(LEN(comp), -1);
+	bfs.push_back(get_id(st));
+	bef[get_id(st)] = -2;
+	// cerr << "bfs = " << LEN(bfs) << '\n';
+	// for (auto [x, y] : mp)
+	// 	cerr << x << ": " << y << '\n';
+	for (int i = 0; i < LEN(bfs); i++) {
+		// cerr << "\ni = " << i << '\n';
+		int id_now = bfs[i];
+		string now = comp[id_now];
+		// cerr << "  | now = " << now << '\n';
+		string ax = now;
+		// cerr << "now = " << now << '\n';
+		for (int j = 0; j < LEN(ax); j++) {
+			char c = ax[j];
+			ax[j] = '#';
+			// cerr << "ax = " << ax << ", " << mp.count(ax) << '\n';
+			// cerr << "mp[v#na] -> " << mp.count("v#na") << '\n';
+			int id_ax = get_id(ax);
+			if (LEN(mp[id_ax])) {
+				for (int nxt : mp[id_ax]) {
+					if (bef[nxt] == -1) {
+						// cerr << "   nxt = " << comp[nxt] << '\n';
+						// cerr << "  IN MAP!!\n";
+						bfs.push_back(nxt);
+						bef[nxt] = id_now;
+					}
+				}
+			}
+			ax[j] = c;
 		}
+	}
+	if (bef[get_id(en)] == -1)
+		cout << "FAIL\n";
+	else {
+		vi ans;
+		int val = get_id(en);
+		while (bef[val]) {
+			ans.push_back(val);
+			if (bef[val] == -2) break;
+			val = bef[val];
+		}
+		reverse(ALL(ans));
+		cout << LEN(ans) << '\n';
+		for (int x : ans)
+			cout << comp[x] << '\n';
 	}
 
 	return 0;

@@ -1,0 +1,105 @@
+#include "bits/stdc++.h"
+#include "ext/pb_ds/tree_policy.hpp"
+#include "ext/pb_ds/assoc_container.hpp"
+using namespace std;
+////////////// Prewritten code follows. Look down for solution. ////////////////
+#define x first
+#define y second
+#define LEN(x) ((int)(x).size())
+#define ALL(x) x.begin(), x.end()
+using ll = long long;
+using llu = long long unsigned;
+using ld = long double;
+using pii = pair<int, int>;
+using vi = vector<int>;
+using vpii = vector<pii>;
+
+template<typename T>
+const T INF = (is_same<T, int>::value ? 1e9 : 1e18);
+const ld EPS = 1e-9;
+const int MOD = 1;
+
+inline int fcmp (ld x, ld y = 0, ld tol = EPS) {
+	return (x <= y + tol) ? (x + tol < y) ? -1 : 0 : 1;
+}
+
+inline int mod (ll x, int m = MOD) {
+	int ret = (int)x%m;
+	if (ret < 0)
+		ret += m;
+	return ret;
+}
+
+template<typename T, typename M = __gnu_pbds::null_type>
+using ordered_set = __gnu_pbds::tree<T, M, less<T>, __gnu_pbds::rb_tree_tag, __gnu_pbds::tree_order_statistics_node_update>;
+
+////////////////////////// Solution starts below. //////////////////////////////
+
+bool rem (string s, char c, int q, string &ret) {
+	vector<char> ax;
+	for (int i = LEN(s)-1; i >= 0; i--)
+		if (q and (s[i]-'0')%3 == c-'0') 
+			--q;
+		else
+			ax.push_back(s[i]);
+	reverse(ALL(ax));
+	if (q) return 0;
+	bool leading = true;
+	for (int i = 0; i < LEN(ax); i++)
+		if (ax[i] == '0' and leading) {
+			if (i == LEN(ax)-1)
+				ret = "0";
+		}
+		else {
+			leading = false;
+			ret.push_back(ax[i]);
+		}
+	if (LEN(ret) == 0) return 0;
+	return 1;
+}
+
+int main () {
+	// freopen("FILE_NAME_INPUT.EXTENSION", "r", stdin);
+	// freopen("FILE_NAME_OUTPUT.EXTENSION", "w", stdout);
+	ios_base::sync_with_stdio(false);
+	cin.tie(NULL);
+	cout.precision(10);
+
+	string s;
+	cin >> s;
+	string ori = s;
+	int sum = 0;
+	for (char &c : s) {
+		sum += c-'0';
+		// if (c != '0') {
+		// 	c = (c-'0')%3 + '0';
+		// 	if (c == '0')
+		// 		c = '3';
+		// }		
+	}
+	string ans = "";
+	if (sum%3 == 0) {
+		cout << s << '\n';
+		exit(0);
+	}
+	else if (sum%3 == 1) {
+		string ret1 = "", ret2 = "";
+		if (rem(s, '1', 1, ret1))
+			ans = ret1;
+		if (rem(s, '2', 2, ret2) and LEN(ret2) > LEN(ans))
+			ans = ret2;
+	}
+	else {
+		string ret1 = "", ret2 = "";
+		if (rem(s, '1', 2, ret1))
+			ans = ret1;
+		if (rem(s, '2', 1, ret2) and LEN(ret2) > LEN(ans))
+			ans = ret2;
+	}
+	if (LEN(ans) == 0)
+		cout << "-1\n";
+	else
+		cout << ans << '\n';
+
+	return 0;
+}

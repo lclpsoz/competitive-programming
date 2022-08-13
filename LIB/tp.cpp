@@ -24,7 +24,7 @@ inline int fcmp (ld x, ld y = 0, ld tol = EPS) {
 }
 
 inline int mod (ll x, int m = MOD) {
-	int ret = x%m;
+	int ret = (int)x%m;
 	if (ret < 0)
 		ret += m;
 	return ret;

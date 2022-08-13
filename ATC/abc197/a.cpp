@@ -46,7 +46,10 @@ int main () {
 
 	string s;
 	cin >> s;
-	cout << s.substr(1, LEN(s)-1) << s[0] << '\n';
+	// cout << s.substr(1, LEN(s)-1) << s[0] << '\n';
+	rotate(s.begin(), s.begin()+3, s.end());
+	// [s.begin(), s.begin()+1)
+	cout << s << '\n';
 
 	return 0;
 }

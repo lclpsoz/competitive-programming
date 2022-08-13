@@ -32,7 +32,7 @@ That way it's possible to run cf-tool from any terminal by default.
    3. Leave suffix empty
    4. Template alias: `cpp`
    5. Before script: `g++ $%full%$ -Wall -Wextra -pedantic -Wshadow -Wformat=2 -Wfloat-equal -Wconversion -Wlogical-op -Wcast-qual -Wcast-align -Wsign-conversion -fsanitize=address -O2 -o $%file%$ -std=c++17`
-   6. After script: `./$%file%$`
+   6. Script: `./$%file%$`
    7. Leave empty after script
 3. `7) set folders' name`
    1. Root path: `CF`

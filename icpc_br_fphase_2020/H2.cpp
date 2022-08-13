@@ -34,6 +34,7 @@ using ordered_set = __gnu_pbds::tree<T, M, less<T>, __gnu_pbds::rb_tree_tag, __g
 
 const int N = (1 << 25) + 500;
 ll vals[55], dp[N], dp2[N];
+int popc[N], ctz[N];
 vector<ll> vals_sep[30];
 int ptA[30], ptB[30];
 
@@ -54,26 +55,28 @@ int main () {
 		for(int i = 0; i < n; i++)
 			ans += vals[i] >= a and vals[i] <= b;
 	} else {
-		int md = n/2;
-		for(int i = 0; i < (1<<md); i++) {
-			int bt = __builtin_popcount(i);
+		int md1 = n/2;
+		int md2 = n-md1;
+		swap(md1, md2);
+		for(int i = 0; i < (1<<md1); i++) {
+			int bt = popc[i] = __builtin_popcount(i);
+			int lg = ctz[i] = __builtin_ctz(i);
             if(bt > k) continue;
-			int lg = __builtin_ctz(i);
 			if(i) dp[i] = dp[i - (1 << lg)] + vals[lg];
             if(dp[i] > b) continue;
 			vals_sep[bt].push_back(dp[i]);
 		}
 
-		for(int i = 0; i <= md; i++) {
+		for(int i = 0; i <= md1; i++) {
 			ptA[i] = LEN(vals_sep[i]);
 			ptB[i] = LEN(vals_sep[i]);
 		}
         --a;
-		for(int i = 0; i < (1<<(n-md)); i++) {
-			int bt = k -__builtin_popcount(i);
+		for(int i = 0; i < (1<<md2); i++) {
+			int bt = k - popc[i];
             if(bt > k) continue;
-			int lg = __builtin_ctz(i);
-            if(i) dp2[i] = dp2[i - (1 << lg)] + vals[md+lg];
+			int lg = ctz[i];
+            if(i) dp2[i] = dp2[i - (1 << lg)] + vals[md1+lg];
 			// cout << md + lg << ": " << vals[md + lg] << endl;
 			// cout << bitset<3>(i) << ": " << dp2[i] << endl;
 			if(bt >= 0 and LEN(vals_sep[bt]) && dp2[i] <= b) {

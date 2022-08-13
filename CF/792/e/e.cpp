@@ -111,6 +111,7 @@ ll find_all_solutions(ll a, ll b, ll c, ll minx, ll maxx, ll miny, ll maxy) {
 }
 
 bool check (pii base, ll sum, vi &vec) {
+	cerr << "check: base = " << base.x << ' ' << base.y << '\n';
 	if (base.y == 0 and sum%base.x) return false;
 	ll a, b, c;
 	if (base.y and !find_any_solution(base.x, base.y, sum, a, b, c))
@@ -140,26 +141,24 @@ int main () {
 	sort(ALL(vec));
 	pii base;
 	base.x = vec.front();
-	base.y = 0;
-	while (!check(base, sum, vec)) {
-		if (base.x%2 == 1 or base.y)
-			base = {base.x/2, base.x/2+1};
-		else
-			base = {base.x/2, 0};
-	}
+	base.y = vec.front()+1;
+	while (!check(base, sum, vec))
+		base = {base.x/2, base.x/2+1};
 	ll ans = 0;
-	for (int v : vec) {
-		// int ax = v%base.x;
-		ll a,b ,c;
-		int l = 0, r = v/base.x;
-		while (l < r) { 
+	for (int val : vec) {
+		cerr << "\nbase = {" << base.x << ", " << base.y << "}\n";	
+		cerr << "val = " << val << '\n';
+		int l = 0, r = 1e9;
+		while (l < r) {
+			cerr << "l, r = " << l << ", " << r << '\n';
 			int md = (l+r)/2;
-			if (find_all_solutions(base.x, base.y, v, 0, md, 0, 1e9+1))
+			if (find_all_solutions(base.x, base.y, val, 0, md, 0, 1e9+1))
 				r = md;
 			else
 				l = md+1;
 		}
-		ans += r + (v-base.x*r)/base.y;
+		val -= base.x * l;
+		ans += l + val/base.y;
 	}
 	cout << ans << '\n';
 

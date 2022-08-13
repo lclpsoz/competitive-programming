@@ -51,8 +51,16 @@ int main () {
 		cin >> x;
 	ll ans = INF<ll>;
 	vector<ll> vals;
-	for (int msk = 0; msk < (1<<n); msk++) {
+	for (int msk = 0; msk < (1<<n); msk++) { // 2^n == (1<<n)
 		vals.clear();
+
+		// 0000
+		// 0001
+		// 0010
+		// 0011
+		// SIMULO A MASK
+
+		// 0 1 0 1 0 1111 00 1 0 1 00 1
 		for (int j = 0; j < n; j++)
 			if (j) {
 				int bef = msk&(1<<(j-1));
@@ -64,6 +72,8 @@ int main () {
 			else {
 				vals.push_back(vec[j]);
 			}
+
+		// XOR DOS SEGMENTOS
 		ll cur = 0;
 		for (int v : vals)
 			cur ^= v;

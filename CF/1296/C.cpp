@@ -19,12 +19,15 @@ const T INF = (is_same<T, int>::value ? 1e9 : 1e18);
 const ld EPS = 1e-9;
 const int MOD = 1;
 
-inline int fcmp(ld x, ld y = 0, ld tol = EPS) {
+inline int fcmp (ld x, ld y = 0, ld tol = EPS) {
 	return (x <= y + tol) ? (x + tol < y) ? -1 : 0 : 1;
 }
 
-inline int mod(ll x, int m = MOD) {
-	return (int)(((x%m) + m)%m);
+inline int mod (ll x, int m = MOD) {
+	int ret = (int)x%m;
+	if (ret < 0)
+		ret += m;
+	return ret;
 }
 
 template<typename T, typename M = __gnu_pbds::null_type>
@@ -32,11 +35,7 @@ using ordered_set = __gnu_pbds::tree<T, M, less<T>, __gnu_pbds::rb_tree_tag, __g
 
 ////////////////////////// Solution starts below. //////////////////////////////
 
-const int N = 2e5 + 5;
 
-int n;
-vpii ans;
-vi available, used(N+5, 0);
 
 int main () {
 	// freopen("FILE_NAME_INPUT.EXTENSION", "r", stdin);
@@ -45,38 +44,45 @@ int main () {
 	cin.tie(NULL);
 	cout.precision(10);
 
-	cin >> n;
-	for (int i = 1; i <= n; i++)
-		available.push_back(i);
+  ll SHIFT = 1e6;
 
-	for (int i = 0; i < n-1; i++) {
-		int a;
-		cin >> a;
-		if (i == 0) cout << a << endl;
+	int t, n;
+	string str;
+  map<ll, int> mp;
+  
+	
+	cin >> t;
+	while (t--) {
+    mp.clear();
+    mp[0] = 1;
 
-		used[a]++;
-		while (LEN(available) and used[available.back()])
-			available.pop_back();
-		
-		if (!LEN(ans) or used[a] > 1) {
-			ans.push_back({a, available.back()});
-			used[available.back()]++;
-			available.pop_back();
-		}
-		else {
-			int x = ans.back().x;
-			int y = ans.back().y;
-			ans.pop_back();
-
-			ans.push_back({x, a});
-			ans.push_back({a, y});
-		}
-
-		// cout << "  ans.back() = " << ans.back().x << ", " << ans.back().y << endl; 
+	  cin >> n;
+	  cin >> str;
+	  int left, right; left = 1e9; right = 2e9;
+	  ll cur = 0;
+	  for (int i = 2; i <= n+1; i++) {
+	    char c = str[i-2];
+      if (c == 'L')
+        cur--;
+      else if (c == 'R')
+        cur++;
+      else if (c == 'U')
+        cur += SHIFT;
+      else if (c == 'D')
+        cur -= SHIFT;
+      
+      // cout << "bef >> cur = " << cur << " <><> mp[cur] = " << mp[cur] << endl;
+  	  if (mp[cur] && right - left > i - mp[cur])
+        left = mp[cur], right = i-1;
+      mp[cur] = i;
+  	  // cout << ">>" << left << ' ' << right << " i = " << i << " cur = " << cur << endl;
+  	}
+  	
+  	if (left == 1e9)
+  	  cout << -1 << endl;
+  	else
+  	  cout << left << ' ' << right << endl;
 	}
-
-	for (int i = 0; i < LEN(ans); i++)
-		cout << ans[i].x << ' ' << ans[i].y << endl;
 
 	return 0;
 }

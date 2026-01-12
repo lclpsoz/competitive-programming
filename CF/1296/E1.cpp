@@ -19,12 +19,15 @@ const T INF = (is_same<T, int>::value ? 1e9 : 1e18);
 const ld EPS = 1e-9;
 const int MOD = 1;
 
-inline int fcmp(ld x, ld y = 0, ld tol = EPS) {
+inline int fcmp (ld x, ld y = 0, ld tol = EPS) {
 	return (x <= y + tol) ? (x + tol < y) ? -1 : 0 : 1;
 }
 
-inline int mod(ll x, int m = MOD) {
-	return (int)(((x%m) + m)%m);
+inline int mod (ll x, int m = MOD) {
+	int ret = (int)x%m;
+	if (ret < 0)
+		ret += m;
+	return ret;
 }
 
 template<typename T, typename M = __gnu_pbds::null_type>
@@ -32,51 +35,55 @@ using ordered_set = __gnu_pbds::tree<T, M, less<T>, __gnu_pbds::rb_tree_tag, __g
 
 ////////////////////////// Solution starts below. //////////////////////////////
 
-const int N = 2e5 + 5;
 
-int n;
-vpii ans;
-vi available, used(N+5, 0);
 
 int main () {
 	// freopen("FILE_NAME_INPUT.EXTENSION", "r", stdin);
 	// freopen("FILE_NAME_OUTPUT.EXTENSION", "w", stdout);
-	ios_base::sync_with_stdio(false);
-	cin.tie(NULL);
-	cout.precision(10);
+	// ios_base::sync_with_stdio(false);
+	// cin.tie(NULL);
+	// cout.precision(10);
+    int n;
+    string original, copy;
+	vector<int> color;
 
-	cin >> n;
-	for (int i = 1; i <= n; i++)
-		available.push_back(i);
 
-	for (int i = 0; i < n-1; i++) {
-		int a;
-		cin >> a;
-		if (i == 0) cout << a << endl;
+    cin >> n >> original;
+	copy = original;
+	for (int i = 0; i < n; i++) color.push_back(0);
 
-		used[a]++;
-		while (LEN(available) and used[available.back()])
-			available.pop_back();
-		
-		if (!LEN(ans) or used[a] > 1) {
-			ans.push_back({a, available.back()});
-			used[available.back()]++;
-			available.pop_back();
-		}
-		else {
-			int x = ans.back().x;
-			int y = ans.back().y;
-			ans.pop_back();
-
-			ans.push_back({x, a});
-			ans.push_back({a, y});
-		}
-
-		// cout << "  ans.back() = " << ans.back().x << ", " << ans.back().y << endl; 
+	char lowest = original.back();
+	for (int i = n-1; i >= 0; i--) {
+		char now = original[i];
+		if (now <= lowest)
+			lowest = now, color[i] = 0;
+		else
+			color[i] = 1;
 	}
 
-	for (int i = 0; i < LEN(ans); i++)
-		cout << ans[i].x << ' ' << ans[i].y << endl;
+	char lst_zero = 'a', lst_one = 'a';
+	for (int i = 0; i < n; i++) {
+		if (color[i]) {
+			if (lst_one > original[i]) {
+				cout << "NO" << endl;
+				return 0;
+			}
+			lst_one = original[i];
+		}
+		else {
+			if (lst_zero > original[i]) {
+				cout << "NO" << endl;
+				return 0;
+			}
+			lst_zero = original[i];
+		}
+	}
+
+	cout << "YES" << endl;
+	for (int i = 0; i < n; i++)
+		cout << color[i];
+	cout << endl;
+
 
 	return 0;
 }
